@@ -5,8 +5,11 @@ import {
   signInWithPopup
 } from "firebase/auth";
 import { auth, provider } from "../firebase";
+import { useNavigate } from "react-router-dom";
 
 export default function Auth() {
+  const navigate = useNavigate();
+
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +21,8 @@ export default function Auth() {
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
       }
-      alert("Success!");
+      
+      navigate("/admin")
 
 
     } catch (err) {
@@ -31,7 +35,7 @@ export default function Auth() {
     try {
       await signInWithPopup(auth, provider);
       alert("Google login success!");
- 
+	  navigate("/admin")
     } catch (err) {
       console.error(err);
     }
