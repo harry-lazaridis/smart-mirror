@@ -1,8 +1,9 @@
 import Mirror from "./pages/Mirror"
+import Auth from "./pages/Auth"
 
 function App() {
   return (
-    <Mirror />
+    <Auth />
   )
 }
 
