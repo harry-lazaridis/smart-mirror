@@ -1,4 +1,3 @@
-// src/pages/Admin.jsx
 import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";

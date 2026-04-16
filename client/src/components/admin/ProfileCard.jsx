@@ -1,4 +1,3 @@
-// src/components/admin/ProfileCard.jsx
 export default function ProfileCard({ user }) {
   return (
     <div style={styles.card}>

@@ -2,7 +2,8 @@ import { useState } from "react";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup
+  signInWithPopup,
+  updateProfile
 } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +12,7 @@ export default function Auth() {
   const navigate = useNavigate();
 
   const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -19,11 +21,15 @@ export default function Auth() {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+		await updateProfile(userCredential.user, {
+			displayName: name
+		})
       }
       
+	  createUserSnap();
       navigate("/admin")
-
 
     } catch (err) {
       console.error(err);
@@ -34,17 +40,57 @@ export default function Auth() {
   const handleGoogle = async () => {
     try {
       await signInWithPopup(auth, provider);
-      alert("Google login success!");
-	  navigate("/admin")
-    } catch (err) {
+	  createUserSnap()
+	  navigate("/admin")  
+	} catch (err) {
       console.error(err);
     }
   };
+
+  const createUserSnap = async () => {
+	const userRef = doc(db, "users", user.uid);
+	const userSnap = await getDoc(userRef);
+
+	if (!userSnap.exists()) {
+		await setDoc(userRef, {
+			name: user.displayName,
+			email: user.email,
+			createdAt: serverTimestamp(),
+
+			settings: {
+				theme: "dark"
+			},
+
+			widgets: {
+				clock: true,
+				calendar: true,
+				sl: true,
+			},
+
+			//Kolla hur det borde lagras igenkligen.
+			slRoute: {
+				from: "",
+				to: ""
+			}
+		})
+	}
+
+  }
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
         <h2>{isLogin ? "Login" : "Sign Up"}</h2>
+
+		{!isLogin && (
+			<input
+				style={styles.input}
+				type="text"
+				placeholder="Name"
+				value={name}
+				onChange={(e) => setName(e.target.value)}
+			/>
+		)}
 
         <input
           style={styles.input}
