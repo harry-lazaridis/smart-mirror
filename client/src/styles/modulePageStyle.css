@@ -1,0 +1,21 @@
+.modules{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+
+}
+
+.module-box{
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.module-box h3 {
+
+}
+
+.module-box p {
+
+}
