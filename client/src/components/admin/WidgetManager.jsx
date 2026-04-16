@@ -1,4 +1,3 @@
-// src/components/admin/WidgetManager.jsx
 import { useState } from "react";
 
 export default function WidgetManager() {

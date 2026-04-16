@@ -1,4 +1,3 @@
-// src/components/admin/CalendarSettings.jsx
 import { useState } from "react";
 
 export default function CalendarSettings() {

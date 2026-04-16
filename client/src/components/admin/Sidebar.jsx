@@ -1,4 +1,23 @@
+import { auth } from "../../firebase";
+import { signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+
 export default function Sidebar({ activeTab, setActiveTab }) {
+ 
+  const navigate = useNavigate();  
+
+  const logout = async () => { 
+    alert("Logout")
+
+    try {
+      await signOut(auth);
+      navigate("/login")
+    } catch (err) {
+      console.error("Logout error: ", err);
+    }
+     
+  }
+  
   const items = [
     { id: "profile", label: "Profile" },
     { id: "calendar", label: "Calendar" },
@@ -9,7 +28,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   return (
     <div style={styles.sidebar}>
       <h2 style={styles.logo}>Mirror Admin</h2>
-
       <div style={styles.menu}>
         {items.map((item) => (
           <button
@@ -24,6 +42,16 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           </button>
         ))}
       </div>
+
+      <button style={{
+        ...styles.button,
+        background: "#334155",
+        marginTop: "10px"
+      }} 
+      
+      onClick={() => logout() }>Logout</button>
+
+
     </div>
   );
 }
