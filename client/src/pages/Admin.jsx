@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { api } from "../api/client";
 
 import Sidebar from "../components/admin/Sidebar";
 import ProfileCard from "../components/admin/ProfileCard";
@@ -29,10 +30,29 @@ export default function Admin() {
     );
   }
 
+  const test = async () => {
+    try {
+      //const token = user.uid
+
+      const token = await auth.currentUser.getIdToken()
+
+      const rest = await api.get("api/auth/google", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      alert(JSON.stringify(rest.data))
+    } catch (error) {
+      alert(error);
+    }
+
+  }
+
   return (
     <div style={styles.layout}>
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-
+      <button onClick={() => test()}>HALLÅ</button>
       <div style={styles.content}>
         {activeTab === "profile" && <ProfileCard user={user} />}
         {activeTab === "calendar" && <CalendarSettings user={user} />}
