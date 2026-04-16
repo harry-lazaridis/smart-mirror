@@ -9,7 +9,6 @@ export const authMiddleware = async (req, res, next) => {
     req.user = decoded;
     next();
   } catch {
-    console.log("fuck")
     res.status(401).send("Invalid token");
   }
 };

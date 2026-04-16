@@ -15,7 +15,6 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
  *  [] Fix loading animation.
  */
 
-
 export default function Auth() {
   const navigate = useNavigate();
 
