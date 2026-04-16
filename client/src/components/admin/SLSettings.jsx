@@ -43,6 +43,9 @@ export default function SLSettings() {
     };
     loadSaved();
 
+    //Morgondagensproblem.
+    //document.addEventListener("mousedown", () => { setFromSuggestions([]); setToSuggestions([]);})
+
   }, []);
 
   //Det funkar.
