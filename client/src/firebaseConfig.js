@@ -1,5 +1,5 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyDjY_VrwXKd37D17FhMRj0S8Bouu8qQU-k",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "magic-mirror-e5482.firebaseapp.com",
   projectId: "magic-mirror-e5482",
   storageBucket: "magic-mirror-e5482.firebasestorage.app",
