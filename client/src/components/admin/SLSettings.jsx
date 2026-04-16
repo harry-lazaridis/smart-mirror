@@ -2,6 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { auth, db } from "../../firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
+/*
+  TODO:
+    [X] Hämta data för ALLA ruter
+    [X] Spara ruter i firestore
+    [X] Ge förslag
+    [X] Restrektiv till valda punkter
+    [] Ta bort lista när vi inte trycker bort från rutan
+
+*/
+
 export default function SLSettings() {
   const [from, setFrom] = useState({ name: "", siteId: "" });
   const [to, setTo] = useState({ name: "", siteId: "" });
@@ -15,6 +25,8 @@ export default function SLSettings() {
   const toRef = useRef(null);
 
   useEffect(() => {
+
+    //Går det att göra det en gång bara?
     const fetchSites = async () => {
       const res = await fetch("https://transport.integration.sl.se/v1/sites?expand=true");
       const data = await res.json();
@@ -31,12 +43,6 @@ export default function SLSettings() {
     };
     loadSaved();
 
-    const handleClickOutside = (e) => {
-      if (fromRef.current && !fromRef.current.contains(e.target)) setFromSuggestions([]);
-      if (toRef.current && !toRef.current.contains(e.target)) setToSuggestions([]);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   //Det funkar.
