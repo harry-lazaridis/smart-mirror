@@ -23,6 +23,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     { id: "calendar", label: "Calendar" },
     { id: "sl", label: "SL Transport" },
     { id: "widgets", label: "Widgets" },
+    { id: "user", label: "User"}
   ];
 
   return (

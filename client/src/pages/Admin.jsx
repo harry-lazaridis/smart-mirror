@@ -7,6 +7,7 @@ import ProfileCard from "../components/admin/ProfileCard";
 import CalendarSettings from "../components/admin/CalendarSettings";
 import SLSettings from "../components/admin/SLSettings";
 import WidgetManager from "../components/admin/WidgetManager";
+import UserManager from "../components/admin/UserManager";
 
 export default function Admin() {
   const [user, setUser] = useState(null);
@@ -37,6 +38,7 @@ export default function Admin() {
         {activeTab === "calendar" && <CalendarSettings user={user} />}
         {activeTab === "sl" && <SLSettings user={user} />}
         {activeTab === "widgets" && <WidgetManager user={user} />}
+        {activeTab === "user" && <UserManager user={user} />}
       </div>
     </div>
   );
