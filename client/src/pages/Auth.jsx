@@ -7,6 +7,14 @@ import {
 } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import { db } from "../firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+
+/**
+ *  TODO:
+ *  [] Fix loading animation.
+ */
+
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -18,19 +26,20 @@ export default function Auth() {
 
   const handleEmailAuth = async () => {
     try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-      } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      let userCredential;
 
-		await updateProfile(userCredential.user, {
-			displayName: name
-		})
+      if (isLogin) {
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+        await updateProfile(userCredential.user, {
+          displayName: name
+        })
       }
       
-	  createUserSnap();
+      await createUserSnap(userCredential.user);
       navigate("/admin")
-
     } catch (err) {
       console.error(err);
       alert(err.message);
@@ -39,41 +48,45 @@ export default function Auth() {
 
   const handleGoogle = async () => {
     try {
-      await signInWithPopup(auth, provider);
-	  createUserSnap()
-	  navigate("/admin")  
-	} catch (err) {
+      const result = await signInWithPopup(auth, provider);
+ 
+      await createUserSnap(result.user)
+
+      navigate("/admin")  
+    
+    } catch (err) {
       console.error(err);
+      alert(err.message);
     }
   };
 
-  const createUserSnap = async () => {
-	const userRef = doc(db, "users", user.uid);
-	const userSnap = await getDoc(userRef);
+  const createUserSnap = async (user) => {
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
 
-	if (!userSnap.exists()) {
-		await setDoc(userRef, {
-			name: user.displayName,
-			email: user.email,
-			createdAt: serverTimestamp(),
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        name: user.displayName || "",
+        email: user.email,
+        createdAt: serverTimestamp(),
 
-			settings: {
-				theme: "dark"
-			},
+        settings: {
+          theme: "dark"
+        },
 
-			widgets: {
-				clock: true,
-				calendar: true,
-				sl: true,
-			},
+        widgets: {
+          clock: true,
+          calendar: true,
+          sl: true,
+        },
 
-			//Kolla hur det borde lagras igenkligen.
-			slRoute: {
-				from: "",
-				to: ""
-			}
-		})
-	}
+        //Kolla hur det borde lagras igenkligen.
+        slRoute: [{
+          from: "",
+          to: ""
+        }]
+      })
+    }
 
   }
 
