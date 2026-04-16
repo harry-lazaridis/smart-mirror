@@ -1,10 +1,11 @@
-// src/components/admin/SLSettings.jsx
 import { useState } from "react";
 
 export default function SLSettings() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
+
+  //TODO: Få den att kunna ge dig autocorrect för stationer.
   const save = () => {
     console.log("SL route saved:", { from, to });
     alert("Saved SL route (backend integration next)");
