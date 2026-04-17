@@ -6,16 +6,51 @@
 
 }
 
-.module-p-text{
+.module-modules-description {
+    align-items: center;
+
+}
+
+.module-icon-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.module-icon-header svg {
+    width: 20px;
+    height: 20px;
+}
+
+.module-modules-description h2 {
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    transform: translateY(-4px);
+
+}
+
+.module-modules-description p{
     color: #676a6f;
+    font-size: 17px;
+    margin-top: 0px;
 
 }
 
 .module-icon{
     border-radius: 12px;
-    background-color: #d6ebf8;
+    background-color: #e5ecfc;
     height: 45px;
     width: 45px;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.module-icon svg {
+    width: 22px;
+    height: 22px;
 }
 
 .module-box{
@@ -26,21 +61,160 @@
     padding: 20px;
 }
 
-.module-title-description{
+.module-box:hover{
+    background-color: #e5e7eb37;
+}
+
+.module-description{
     display: flex;
     flex-direction: column;
     margin-left: 13px;
+    flex: auto;
+    gap: 6px;
   
-
 }
 
 .module-box h3 {
     margin: 0px;
-    
+    font-weight: 500;
+    font-size: 18px;
 
 }
 
 .module-box p {
     color: #676a6f;
     margin: 0px;
+    font-size: 14px;
+}
+
+.module-title-category {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.module-category {
+    border-radius: 10px;
+    padding: 3px 10px 3px 10px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.module-category.core {
+    background:#e5ecfc;
+    color: #2563eb;
+
+}
+
+.module-category.weather {
+    background:#fdefdf;
+    color: #df3603;
+
+}
+
+.module-category.productivity {
+    background:#fbeaff;
+    color: #9403b9;
+
+}
+
+.module-category.transport {
+    background:#e2ffeb;
+    color: #008929;
+
+}
+
+.module-active {
+    color: #00aa33;
+    border: 1px solid #00aa33;
+    border-radius: 10px;
+    font-size: smaller;
+    padding: 3px 10px 3px 10px;
+    font-weight: 500;
+
+}
+
+.module-toggle-box{
+    display: flex;
+    margin-right: 13px;
+    align-items: center;
+    gap: 16px;
+}
+
+
+/* Style of Toggling is based on example W3schools: https://www.w3schools.com/howto/howto_css_switch.asp */
+/* Begins here */
+.switch{
+    position: relative;
+    display: inline-block;
+    width: 35px;
+    height: 19px;
+
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 0px;
+    bottom: 0px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border: 1.5px solid #ccc;
+
+  }
+
+  input:checked + .slider {
+    background-color: #000000;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(16px);
+    border: 1.5px solid #000000;
+  }
+
+  .slider.round {
+    border-radius: 34px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
+
+/* Ends here*/
+
+
+.module-note{
+    display: flex;
+    border: 1px solid #6a94ef50;
+    border-radius: 16px;
+    background-color: #afc5f52b;
+    color: #082f83;
+    padding: 16px;
+    margin-top: 25px;
+    font-size: 15px;
+}
+
+.note-style {
+    margin-right: 6px;
 }
