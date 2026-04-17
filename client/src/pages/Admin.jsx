@@ -17,6 +17,7 @@ export default function Admin() {
     if (params.get("calendar") === "connected") return "calendar";
     return "profile";
   });
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
@@ -25,6 +26,7 @@ export default function Admin() {
     return () => unsub();
   }, []);
 
+  //Varför går den sönder när jag tar bort den här?
   if (!user) {
     return (
       <div style={styles.center}>
@@ -32,7 +34,6 @@ export default function Admin() {
       </div>
     );
   }
-
 
   return (
     <div style={styles.layout}>

@@ -39,6 +39,9 @@ export default function CalendarSettings() {
     }
   }, []);
 
+  /**
+   * Work around axios för att redirecta google api. kolla om det går bättre för att få in loading.
+   */
   const connectGoogle = async () => {
     const token = await auth.currentUser.getIdToken();
     window.location.href = `http://localhost:3000/api/auth/google?token=${token}`;
