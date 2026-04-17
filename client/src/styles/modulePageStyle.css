@@ -6,16 +6,41 @@
 
 }
 
+.module-p-text{
+    color: #676a6f;
+
+}
+
+.module-icon{
+    border-radius: 12px;
+    background-color: #d6ebf8;
+    height: 45px;
+    width: 45px;
+}
+
 .module-box{
+    display: flex;
+    align-items: center;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     padding: 20px;
 }
 
+.module-title-description{
+    display: flex;
+    flex-direction: column;
+    margin-left: 13px;
+  
+
+}
+
 .module-box h3 {
+    margin: 0px;
+    
 
 }
 
 .module-box p {
-
+    color: #676a6f;
+    margin: 0px;
 }

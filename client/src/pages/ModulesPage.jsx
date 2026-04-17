@@ -56,14 +56,21 @@ function ModulesPage() {
       </div>
 
       <div className="content-panel">
+        <div className="module-modules-description">
         <h2>Available modules</h2>
+        <div className="module-p-text">
         <p>Toggle modules on or off to customize your SmartMirror display.</p>
+        </div>
+        </div>
         <div className="modules">
+
           {module.map((module) => (
             <div className="module-box" key={module.moduleID}>
+              <div className="module-icon"></div>
+              <div className="module-title-description">
               <h3>{module.name}</h3>
               <p>{module.description}</p>
-      
+              </div>
             </div>
             
           ))}
