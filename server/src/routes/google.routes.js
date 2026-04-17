@@ -56,7 +56,6 @@ router.get("/google/callback", async (req, res) => {
       { merge: true }
     );
 
-    // Redirect back to your frontend after success
     res.redirect("http://localhost:5173/admin?calendar=connected");
   } catch (err) {
     console.error(err);
