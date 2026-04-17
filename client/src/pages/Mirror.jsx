@@ -7,8 +7,6 @@ export default function Mirror() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-
-
     const uid = auth.currentUser?.uid;
     if (!uid) return;
 
@@ -149,6 +147,9 @@ const styles = {
     borderRadius: 6,
     overflow: "hidden",
     display: "flex",
+    outlineColor: "#FFF",
+    outlineStyle: "solid"
+    
   },
   center: {
     width: "100%",
