@@ -43,9 +43,10 @@ export default function SLSettings() {
     };
     loadSaved();
 
-    //Morgondagensproblem.
-    //document.addEventListener("mousedown", () => { setFromSuggestions([]); setToSuggestions([]);})
-
+    const handleClickOutside = (e) => {
+      if (fromRef.current && !fromRef.current.contains(e.value)) setFromSuggestions([]);
+      if (toRef.current && !toRef.current.contains(e)) setFromSuggestions([]);
+    }
   }, []);
 
   //Det funkar.

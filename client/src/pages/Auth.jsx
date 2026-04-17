@@ -83,7 +83,9 @@ export default function Auth() {
         slRoute: [{
           from: "",
           to: ""
-        }]
+        }],
+
+        connectedToCalendar: false 
       })
     }
 

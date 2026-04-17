@@ -84,10 +84,12 @@ export default function WidgetManager() {
   const save = async () => {
     setLoading(true);
     try {
+      
       const uid = auth.currentUser?.uid;
       await setDoc(doc(db, "users", uid), {
         widgetLayout: { mirrorW, mirrorH, placed }
       }, { merge: true });
+
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {

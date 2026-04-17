@@ -52,7 +52,7 @@ router.get("/google/callback", async (req, res) => {
     const uid = state;
 
     await db.collection("users").doc(uid).set(
-      { googleTokens: tokens },
+      { googleTokens: tokens, connectedToCalendar: true },
       { merge: true }
     );
 

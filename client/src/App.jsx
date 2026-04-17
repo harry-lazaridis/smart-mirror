@@ -12,6 +12,15 @@ function App() {
         {/** Public access */}
         <Route path="/login" element={<Auth />} /> 
 
+        <Route 
+          path="/mirror" 
+          element={
+            <ProtectedRoute>
+              <Mirror />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/admin"
           element={
