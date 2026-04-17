@@ -16,6 +16,7 @@ export default function CalendarSettings() {
         });
 
         const data = await res.json();
+        
         if (res.ok) {
           setConnected(true);
           setEvents(data);

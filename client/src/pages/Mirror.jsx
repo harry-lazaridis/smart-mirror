@@ -1,11 +1,26 @@
 import { useEffect, useState, useRef } from "react";
 import { auth, db } from "../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 
 export default function Mirror() {
   const [layout, setLayout] = useState(null);
   const canvasRef = useRef(null);
 
+  useEffect(() => {
+
+
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
+    const unsubscribe = onSnapshot(doc(db, "users", uid), (snap) => {
+      const data = snap.data()?.widgetLayout;
+      if (data) { setLayout(data); }
+    });
+    
+    return () => unsubscribe();
+  }, []);
+
+/*
   useEffect(() => {
     const load = async () => {
       const uid = auth.currentUser?.uid;
@@ -21,7 +36,7 @@ export default function Mirror() {
 
     load();
   }, []);
-
+*/
   if (!layout) {
     return <p style={{ color: "white", padding: 20 }}>Loading...</p>;
   }
@@ -125,12 +140,12 @@ const styles = {
     height: "100%",
     maxWidth: "100vw",
     maxHeight: "100vh",
-    background: "#020617", //#020617
+    background: "#00000", //#020617
     overflow: "hidden",
   },
   widget: {
     position: "absolute",
-    background: "#0c1e35", //#0c1e35
+    background: "#000000", //#0c1e35
     borderRadius: 6,
     overflow: "hidden",
     display: "flex",
