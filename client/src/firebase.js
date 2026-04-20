@@ -5,14 +5,14 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDatMgTz2NEeKvIqJ1khQD9KVsjeUmF1sU",
-  authDomain: "blackmirror-ff202.firebaseapp.com",
-  projectId: "blackmirror-ff202",
-  storageBucket: "blackmirror-ff202.firebasestorage.app",
-  messagingSenderId: "531172750499",
-  appId: "1:531172750499:web:5143ad4e6343abe49b7b16",
-  measurementId: "G-6KG52JEYHS"
+  apiKey: "AIzaSyDjY_VrwXKd37D17FhMRj0S8Bouu8qQU-k",
+  authDomain: "magic-mirror-e5482.firebaseapp.com",
+  projectId: "magic-mirror-e5482",
+  storageBucket: "magic-mirror-e5482.firebasestorage.app",
+  messagingSenderId: "733732733390",
+  appId: "1:733732733390:web:851708d26e0316da13eb9f"
 };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
