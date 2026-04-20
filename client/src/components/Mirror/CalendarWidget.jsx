@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react"
+
+import { api } from "../../api/client"
 import { auth } from "../../firebase";
 
-export default function CalendarSettings() {
+export default function CalendarWidget() {
+    
   const [connected, setConnected] = useState(false);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,8 +40,6 @@ export default function CalendarSettings() {
       checkConnection();
       window.history.replaceState({}, "", "/admin"); //Fråga inte varför
     }
-
-    console.log(events)
   }, []);
 
   /**
@@ -51,24 +52,9 @@ export default function CalendarSettings() {
 
   if (loading) return <div style={styles.card}>Loading...</div>;
 
+  //https://developers.google.com/workspace/calendar/api/v3/reference/events#resource
+  
   return (
-    <div style={styles.card}>
-      <h2>Calendar Integration</h2>
-
-      <p>
-        Status:{" "}
-        <span style={{ color: connected ? "#4ade80" : "#f87171" }}>
-          {connected ? "Connected" : "Not connected"}
-        </span>
-      </p>
-
-      {!connected && (
-        <button onClick={connectGoogle} style={styles.button}>
-          Connect Google Calendar
-        </button>
-      )}
-
-      {connected && (
         <div>
           <h3>Upcoming events</h3>
           {events.length === 0 && <p>No events today</p>}
@@ -78,10 +64,8 @@ export default function CalendarSettings() {
               <p>{event.start?.dateTime ?? event.start?.date}</p>
             </div>
           ))}
-        </div>
-      )}
-    </div>
-  );
+        </div> 
+  )
 }
 
 const styles = {

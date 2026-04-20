@@ -3,6 +3,8 @@ import { auth, db } from "../firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 
 import WeatherWidget from "../components/Mirror/WeatherWidget";
+import SLWidget from "../components/Mirror/SLWidget";
+import CalendarWidget from "../components/Mirror/CalendarWidget";
 
 export default function Mirror() {
   const [layout, setLayout] = useState(null);
@@ -111,14 +113,6 @@ function ClockWidget() {
 
 function NewsWidget() {
   return <div style={styles.center}>News</div>;
-}
-
-function CalendarWidget() {
-  return <div style={styles.center}>Calendar</div>;
-}
-
-function SLWidget() {
-  return <div style={styles.center}>SL</div>;
 }
 
 const styles = {
