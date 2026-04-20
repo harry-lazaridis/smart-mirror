@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 
 import Mirror from "./pages/Mirror"
+
 import Auth from "./pages/Auth"
 import Admin from "./pages/Admin"
 import Syncs from "./pages/Syncing"
