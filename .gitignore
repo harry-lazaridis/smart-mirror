@@ -3,6 +3,9 @@ node_modules/
 dist/
 build/
 
+
 .env
 .env.local
 .env.*.local
+server/firebase-key.json
+server/.env
