@@ -1,8 +1,24 @@
+import { useEffect } from "react";
 import "../styles/dashBoardStyle.css";
 
 export function DashBoardView(props){
     const activities = props.activities || [];
 
+
+    const [calendar, setCalendar] = useState(null);
+    const [calendar, setCalendar] = useState(null);
+    const [calendar, setCalendar] = useState(null);
+    const [calendar, setCalendar] = useState(null);
+    const [calendar, setCalendar] = useState(null);
+    
+    useEffect(() => {
+        //Fetchar du data för alla olika states,
+
+        setCalendar([data]);
+
+        
+    }, [])
+    
     return(
         <div className="dashboard">
 
