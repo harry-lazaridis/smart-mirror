@@ -5,6 +5,8 @@ import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import WeatherWidget from "../components/Mirror/WeatherWidget";
 import SLWidget from "../components/Mirror/SLWidget";
 import CalendarWidget from "../components/Mirror/CalendarWidget";
+import ClockWidget from "../components/Mirror/ClockWidget";
+import NewsWidget from "../components/Mirror/NewsWidget";
 
 export default function Mirror() {
   const [layout, setLayout] = useState(null);
@@ -94,25 +96,6 @@ function renderWidget(id) {
     default:
       return <div>Unknown</div>;
   }
-}
-
-function ClockWidget() {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const i = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(i);
-  }, []);
-
-  return (
-    <div style={styles.center}>
-      <h2>{time.toLocaleTimeString()}</h2>
-    </div>
-  );
-}
-
-function NewsWidget() {
-  return <div style={styles.center}>News</div>;
 }
 
 const styles = {

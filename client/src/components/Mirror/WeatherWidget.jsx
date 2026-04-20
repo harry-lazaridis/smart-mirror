@@ -6,7 +6,7 @@ export default function WeatherWidget() {
 
     /*
         // https://dev.to/choiruladamm/how-to-use-geolocation-api-using-reactjs-ndk
-        [] Create a form for the user to pass in current location if 'navigator' does not work
+        [x] Create a form for the user to pass in current location if 'navigator' does not work
     */
 
     const [weather, setWeather] = useState(null);
