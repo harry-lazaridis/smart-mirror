@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { auth, db } from "../firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 
+import WeatherWidget from "../components/Mirror/WeatherWidget";
+
 export default function Mirror() {
   const [layout, setLayout] = useState(null);
   const canvasRef = useRef(null);
@@ -105,10 +107,6 @@ function ClockWidget() {
       <h2>{time.toLocaleTimeString()}</h2>
     </div>
   );
-}
-
-function WeatherWidget() {
-  return <div style={styles.center}>Weather</div>;
 }
 
 function NewsWidget() {

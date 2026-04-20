@@ -242,7 +242,7 @@ export default function WidgetManager() {
               maxWidth: Math.min(mirrorW, 460),
             }}
           >
-            <p style={styles.canvasLabel}>{mirrorW}×{mirrorH}px</p>
+            <p style={styles.canvasLabel}>{mirrorW}X{mirrorH}px</p>
 
             {placed.map(p => {
               const scaleX = 100 / mirrorW;
