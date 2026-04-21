@@ -43,6 +43,18 @@ export default function WeatherWidget() {
     if (loading) { return <h1>Loading...</h1>}
     if (error) { return <h1>{error}</h1>}
 
+
+    /*
+
+    res.json({
+      temp:        convertKelvinToCelcius(result.main.temp),
+      feels_like:  convertKelvinToCelcius(result.main.feels_like),
+      description: result.weather[0].description,
+      city:        result.name,
+      icon:        result.weather[0].icon,
+    });
+
+    */
     return (
         <div style={styles.center}>
             <h1>{weather.temp}</h1>

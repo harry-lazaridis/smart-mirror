@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { auth, db} from "../firebase";
+import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { api } from "../api/client";
 
 import Sidebar from "../components/admin/Sidebar";
 import ProfileCard from "../components/admin/ProfileCard";
@@ -9,6 +8,8 @@ import CalendarSettings from "../components/admin/CalendarSettings";
 import SLSettings from "../components/admin/SLSettings";
 import WidgetManager from "../components/admin/WidgetManager";
 import UserManager from "../components/admin/UserManager";
+import WidgetLayout from "../components/admin/WidgetLayout";
+
 
 export default function Admin() {
   const [user, setUser] = useState(null);
@@ -17,54 +18,54 @@ export default function Admin() {
     if (params.get("calendar") === "connected") return "calendar";
     return "profile";
   });
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-    });
-
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsub();
   }, []);
 
-  //Varför går den sönder när jag tar bort den här?
   if (!user) {
     return (
-      <div style={styles.center}>
+      <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <h2>Please login to access admin panel</h2>
       </div>
     );
   }
 
   return (
-    <div style={styles.layout}>
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div style={styles.content}>
-        {activeTab === "profile" && <ProfileCard user={user} />}
-        {activeTab === "calendar" && <CalendarSettings user={user} />}
-        {activeTab === "sl" && <SLSettings user={user} />}
-        {activeTab === "widgets" && <WidgetManager user={user} />}
-        {activeTab === "user" && <UserManager user={user} />}
-      </div>
+    <div className="app-shell">
+
+      {/* Mobile header */}
+      <header className="mobile-header">
+        <button className="hamburger-button" onClick={() => setMobileOpen(true)}>
+          <span /><span /><span />
+        </button>
+        <span className="mobile-header-title">BlackMirror</span>
+      </header>
+
+      {/* Overlay when mobile menu is open */}
+      {mobileOpen && (
+        <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />
+      )}
+
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={(tab) => { setActiveTab(tab); setMobileOpen(false); }}
+        mobileOpen={mobileOpen}
+      />
+
+      <main className="app-content" style={{ marginLeft: 245, padding: 32, width: "calc(100% - 245px)" }}>
+        <div className="page">
+          {activeTab === "profile"  && <ProfileCard user={user} />}
+          {activeTab === "calendar" && <CalendarSettings user={user} />}
+          {activeTab === "sl"       && <SLSettings user={user} />}
+          {activeTab === "widgets"  && <WidgetManager user={user} />}
+          {activeTab === "layout" && <WidgetLayout user={user} />}
+          {activeTab === "user"     && <UserManager user={user} />}
+        </div>
+      </main>
+
     </div>
   );
 }
-
-const styles = {
-  layout: {
-    display: "flex",
-    height: "100vh",
-    fontFamily: "sans-serif",
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-    background: "#0f172a",
-    color: "white",
-  },
-  center: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-};
