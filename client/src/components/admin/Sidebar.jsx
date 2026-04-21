@@ -1,87 +1,62 @@
 import { auth } from "../../firebase";
 import { signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
 
-export default function Sidebar({ activeTab, setActiveTab }) {
- 
-  const navigate = useNavigate();  
+const NAV_ITEMS = [
+  { id: "profile",  label: "Profile",  icon: "👤" },
+  { id: "calendar", label: "Calendar", icon: "📅" },
+  { id: "sl",       label: "SL Transport", icon: "🚇" },
+  { id: "widgets",  label: "Widgets",  icon: "🧩" },
+  { id: "layout", label: "Mirror Layout", icon: "🖥️" },
+  { id: "user",     label: "Account",  icon: "⚙️" },
+];
 
-  const logout = async () => { 
-    alert("Logout")
-
-    try {
-      await signOut(auth);
-      navigate("/login")
-    } catch (err) {
-      console.error("Logout error: ", err);
-    }
-     
-  }
-  
-  const items = [
-    { id: "profile", label: "Profile" },
-    { id: "calendar", label: "Calendar" },
-    { id: "sl", label: "SL Transport" },
-    { id: "widgets", label: "Widgets" },
-    { id: "user", label: "User"}
-  ];
+export default function Sidebar({ activeTab, setActiveTab, mobileOpen }) {
+  const handleLogout = async () => {
+    await signOut(auth);
+    window.location.href = "/";
+  };
 
   return (
-    <div style={styles.sidebar}>
-      <h2 style={styles.logo}>Mirror Admin</h2>
-      <div style={styles.menu}>
-        {items.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            style={{
-              ...styles.button,
-              background: activeTab === item.id ? "#334155" : "transparent",
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
+    <aside className="sidebar">
+
+      {/* Brand */}
+      <div className="sidebar-top">
+        <div className="brand">
+          <div className="brand-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+            </svg>
+          </div>
+          <div className="brand-text">
+            <span className="brand-title">BlackMirror</span>
+            <span className="brand-subtitle">Admin Panel</span>
+          </div>
+        </div>
       </div>
 
-      <button style={{
-        ...styles.button,
-        background: "#334155",
-        marginTop: "10px"
-      }} 
-      
-      onClick={() => logout() }>Logout</button>
+      {/* Nav */}
+      <nav className="sidebar-nav">
+        {NAV_ITEMS.map((item) => (
+          <button
+            key={item.id}
+            className={`nav-item ${activeTab === item.id ? "active" : ""}`}
+            onClick={() => setActiveTab(item.id)}
+          >
+            <span className="nav-icon">{item.icon}</span>
+            <span className="nav-label">{item.label}</span>
+          </button>
+        ))}
+      </nav>
 
+      {/* Logout */}
+      <div className="sidebar-bottom">
+        <button className="logout-button" onClick={handleLogout}>
+          <span className="nav-icon">🚪</span>
+          <span className="nav-label">Logga ut</span>
+        </button>
+      </div>
 
-    </div>
+    </aside>
   );
 }
-
-const styles = {
-  sidebar: {
-    width: "220px",
-    background: "#0f172a",
-    color: "white",
-    padding: "20px 15px",
-    display: "flex",
-    flexDirection: "column",
-    borderRight: "1px solid #1e293b",
-  },
-  logo: {
-    fontSize: "18px",
-    marginBottom: "20px",
-  },
-  menu: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-  button: {
-    padding: "10px",
-    border: "none",
-    color: "white",
-    cursor: "pointer",
-    textAlign: "left",
-    borderRadius: "6px",
-  },
-};

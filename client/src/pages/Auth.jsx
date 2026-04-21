@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -23,7 +23,16 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  useEffect(() => {
+    console.log("Hello WOrld")
+    console.log(import.meta.env.VITE_TEST)
+  }, [])
+
   const handleEmailAuth = async () => {
+
+
+
+
     try {
       let userCredential;
 

@@ -3,15 +3,17 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import React from "react"
+
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDatMgTz2NEeKvIqJ1khQD9KVsjeUmF1sU",
-  authDomain: "blackmirror-ff202.firebaseapp.com",
-  projectId: "blackmirror-ff202",
-  storageBucket: "blackmirror-ff202.firebasestorage.app",
-  messagingSenderId: "531172750499",
-  appId: "1:531172750499:web:5143ad4e6343abe49b7b16",
-  measurementId: "G-6KG52JEYHS"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

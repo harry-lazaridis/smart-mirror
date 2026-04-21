@@ -1,46 +1,62 @@
 import { useEffect, useState, useRef } from "react";
 import { auth, db } from "../firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 import WeatherWidget from "../components/Mirror/WeatherWidget";
 import SLWidget from "../components/Mirror/SLWidget";
 import CalendarWidget from "../components/Mirror/CalendarWidget";
 import ClockWidget from "../components/Mirror/ClockWidget";
 import NewsWidget from "../components/Mirror/NewsWidget";
+import { onAuthStateChanged } from "firebase/auth";
+
+//Radera när vi deploy.
+const isDevMode = () => localStorage.getItem("devMode") === "true";
 
 export default function Mirror() {
+  const [uid, setUid] = useState(null);
   const [layout, setLayout] = useState(null);
+  const [status, setStatus] = useState("loading")
+  const navigate = useNavigate();
+
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
+    let userUnsub = null;
 
-    const unsubscribe = onSnapshot(doc(db, "users", uid), (snap) => {
-      const data = snap.data()?.widgetLayout;
-      if (data) { setLayout(data); }
-    });
-    
-    return () => unsubscribe();
-  }, []);
+    const setupUserListener = (uid) => {
+      if (userUnsub) userUnsub();
 
-/*
-  useEffect(() => {
-    const load = async () => {
-      const uid = auth.currentUser?.uid;
-      if (!uid) return;
-
-      const snap = await getDoc(doc(db, "users", uid));
-      const data = snap.data()?.widgetLayout;
-
-      if (data) {
-        setLayout(data);
-      }
+      userUnsub = onSnapshot(doc(db, "users", uid), (snap) => {
+        const widgetLayout = snap.data()?.widgetLayout;
+        if (widgetLayout) setLayout(widgetLayout);
+        setStatus("ready");
+      });
     };
 
-    load();
+    if (isDevMode()) {
+      const unsub = onAuthStateChanged(auth, (user) => {
+        if (!user) { setStatus("unlinked"); return; }
+        setUid(user.uid);
+        setupUserListener(user.uid);
+      });
+      return () => { unsub(); if (userUnsub) userUnsub(); };
+    }
+
+    // Production
+    const deviceId = localStorage.getItem("deviceId");
+    if (!deviceId) { navigate("/sync"); return; }
+
+    const deviceUnsub = onSnapshot(doc(db, "devices", deviceId), (snap) => {
+      const data = snap.data();
+      if (!data?.uid) { navigate("/sync"); return; }
+      setUid(data.uid);
+      setupUserListener(data.uid);
+    });
+
+    return () => { deviceUnsub(); if (userUnsub) userUnsub(); };
   }, []);
-*/
+
   if (!layout) {
     return <p style={{ color: "white", padding: 20 }}>Loading...</p>;
   }
