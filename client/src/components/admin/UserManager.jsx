@@ -3,24 +3,18 @@ import { useEffect, useState } from "react";
 import { auth } from "../../firebase";
 
 export default function UserManager() {
-  const [user, setUser] = useState(null);
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const [user, setUser]                   = useState(null);
+  const [name, setName]                   = useState("");
+  const [email, setEmail]                 = useState("");
+  const [newPassword, setNewPassword]     = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
-
-  const [status, setStatus] = useState({ message: "", type: "" });
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus]               = useState({ message: "", type: "" });
+  const [loading, setLoading]             = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
-      if (u) {
-        setUser(u);
-        setName(u.displayName ?? "");
-        setEmail(u.email ?? "");
-      }
+      if (u) { setUser(u); setName(u.displayName ?? ""); setEmail(u.email ?? ""); }
     });
     return () => unsub();
   }, []);
@@ -30,7 +24,6 @@ export default function UserManager() {
     setTimeout(() => setStatus({ message: "", type: "" }), 3000);
   };
 
-  // Firebase requires recent login before sensitive changes
   const reauthenticate = async () => {
     const credential = EmailAuthProvider.credential(user.email, currentPassword);
     await reauthenticateWithCredential(user, credential);
@@ -49,10 +42,7 @@ export default function UserManager() {
   };
 
   const handleUpdateEmail = async () => {
-    if (!currentPassword) {
-      showStatus("Enter your current password to change email", "error");
-      return;
-    }
+    if (!currentPassword) { showStatus("Enter your current password to change email", "error"); return; }
     setLoading(true);
     try {
       await reauthenticate();
@@ -66,25 +56,14 @@ export default function UserManager() {
   };
 
   const handleUpdatePassword = async () => {
-    if (newPassword !== confirmPassword) {
-      showStatus("Passwords don't match", "error");
-      return;
-    }
-    if (newPassword.length < 6) {
-      showStatus("Password must be at least 6 characters", "error");
-      return;
-    }
-    if (!currentPassword) {
-      showStatus("Enter your current password first", "error");
-      return;
-    }
+    if (newPassword !== confirmPassword) { showStatus("Passwords don't match", "error"); return; }
+    if (newPassword.length < 6) { showStatus("Password must be at least 6 characters", "error"); return; }
+    if (!currentPassword) { showStatus("Enter your current password first", "error"); return; }
     setLoading(true);
     try {
       await reauthenticate();
       await updatePassword(user, newPassword);
-      setNewPassword("");
-      setConfirmPassword("");
-      setCurrentPassword("");
+      setNewPassword(""); setConfirmPassword(""); setCurrentPassword("");
       showStatus("Password updated!");
     } catch (err) {
       showStatus(err.message, "error");
@@ -96,123 +75,63 @@ export default function UserManager() {
   if (!user) return null;
 
   return (
-    <div style={styles.page}>
-      <h2 style={styles.title}>Account settings</h2>
+    <div>
+      <div className="page-header">
+        <h1>Account settings</h1>
+        <p>Update your name, email and password.</p>
+      </div>
 
       {status.message && (
-        <div style={styles.status(status.type)}>
+        <div className={status.type === "error" ? "status-error" : "status-success"}>
           {status.message}
         </div>
       )}
 
-      {/* Avatar */}
-      <div style={styles.avatar}>
-        {(name || email)?.[0]?.toUpperCase() ?? "?"}
-      </div>
-
-      {/* Display name */}
-      <div style={styles.section}>
-        <label style={styles.label}>Display name</label>
-        <div style={styles.row}>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={styles.input}
-            placeholder="Your name"
-          />
-          <button onClick={handleUpdateName} disabled={loading} style={styles.button}>
-            Save
-          </button>
+      {/* Name */}
+      <div className="settings-card">
+        <h2>Display name</h2>
+        <label>Name</label>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input className="settings-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+          <button className="btn-primary" onClick={handleUpdateName} disabled={loading}>Save</button>
         </div>
       </div>
 
       {/* Email */}
-      <div style={styles.section}>
-        <label style={styles.label}>Email</label>
-        <div style={styles.row}>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
-            placeholder="your@email.com"
-          />
-          <button onClick={handleUpdateEmail} disabled={loading} style={styles.button}>
-            Save
-          </button>
+      <div className="settings-card">
+        <h2>Email</h2>
+        <label>Email address</label>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input className="settings-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" />
+          <button className="btn-primary" onClick={handleUpdateEmail} disabled={loading}>Save</button>
         </div>
       </div>
 
-      {/* New password */}
-      <div style={styles.section}>
-        <label style={styles.label}>New password</label>
-        <input
-          type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          style={{ ...styles.input, marginBottom: 8 }}
-          placeholder="New password"
-        />
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          style={styles.input}
-          placeholder="Confirm new password"
-        />
-      </div>
+      {/* Password */}
+      <div className="settings-card">
+        <h2>Change password</h2>
+        <label>New password</label>
+        <input className="settings-input" type="password" value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)} placeholder="New password"
+          style={{ marginBottom: 8 }} />
 
-      <div style={styles.section}>
-        <label style={styles.label}>Current password <span style={{ color: "#64748b" }}>(required to change email or password)</span></label>
-        <input
-          type="password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          style={styles.input}
-          placeholder="Your current password"
-        />
-      </div>
+        <label>Confirm new password</label>
+        <input className="settings-input" type="password" value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password"
+          style={{ marginBottom: 16 }} />
 
-      <button onClick={handleUpdatePassword} disabled={loading} style={styles.primaryButton}>
-        {loading ? "Updating..." : "Update password"}
-      </button>
+        <label>
+          Current password{" "}
+          <span style={{ color: "#9ca3af", fontWeight: 400 }}>(required for email & password changes)</span>
+        </label>
+        <input className="settings-input" type="password" value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Your current password"
+          style={{ marginBottom: 16 }} />
+
+        <button className="btn-primary" onClick={handleUpdatePassword} disabled={loading} style={{ width: "100%" }}>
+          {loading ? "Updating..." : "Update password"}
+        </button>
+      </div>
     </div>
   );
 }
-
-const styles = {
-  page: { padding: 20, color: "white", maxWidth: 480 },
-  title: { marginBottom: 20 },
-  avatar: {
-    width: 64, height: 64, borderRadius: "50%",
-    background: "#3b82f6", display: "flex",
-    alignItems: "center", justifyContent: "center",
-    fontSize: 26, fontWeight: 600, marginBottom: 24,
-  },
-  section: { marginBottom: 20 },
-  label: { display: "block", fontSize: 13, color: "#94a3b8", marginBottom: 6 },
-  row: { display: "flex", gap: 8 },
-  input: {
-    flex: 1, padding: "10px 12px", borderRadius: 8,
-    background: "#0f172a", color: "white",
-    border: "1px solid #334155", fontSize: 14,
-    width: "100%", boxSizing: "border-box",
-  },
-  button: {
-    padding: "10px 16px", background: "#1e40af",
-    color: "white", border: "none", borderRadius: 8,
-    cursor: "pointer", whiteSpace: "nowrap",
-  },
-  primaryButton: {
-    width: "100%", padding: "12px", background: "#3b82f6",
-    color: "white", border: "none", borderRadius: 8,
-    cursor: "pointer", fontSize: 15, marginTop: 8,
-  },
-  status: (type) => ({
-    padding: "10px 14px", borderRadius: 8, marginBottom: 16,
-    fontSize: 14,
-    background: type === "error" ? "#450a0a" : "#052e16",
-    color: type === "error" ? "#f87171" : "#4ade80",
-    border: `1px solid ${type === "error" ? "#7f1d1d" : "#14532d"}`,
-  }),
-};
