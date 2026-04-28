@@ -568,3 +568,32 @@ button {
   margin-bottom: 10px;
   gap: 12px;
 }
+
+/*Coloring for the text inside of SL-widget*/
+.sl-widget {
+  color: white;
+}
+
+.sl-widget .line-number,
+.sl-widget .destination,
+.sl-widget .display-time {
+  color: white;
+}
+
+/*Spacing and grid layout for when theres multiple stops*/
+.sl-widget {
+  width: 100%;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px;
+  align-items: start;
+}
+
+.sl-last-updated {
+  grid-column: 1 / -1;
+}
+
+.sl-stop-card {
+  width: 100%;
+  min-width: 0;
+}
