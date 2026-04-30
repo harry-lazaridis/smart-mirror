@@ -40,8 +40,8 @@ export default function WeatherWidget() {
         )
     }, [])
 
-    if (loading) { return <h1>Loading...</h1>}
-    if (error) { return <h1>{error}</h1>}
+    if (loading) { return <div style={styles.center}><p style={styles.meta}>Loading weather...</p></div>}
+    if (error) { return <div style={styles.center}><p style={styles.meta}>{String(error)}</p></div>}
 
 
     /*
@@ -57,7 +57,9 @@ export default function WeatherWidget() {
     */
     return (
         <div style={styles.center}>
-            <h1>{weather.temp}</h1>
+            <p style={styles.label}>{weather.city || "Local weather"}</p>
+            <h1 style={styles.temp}>{weather.temp}°C</h1>
+            <p style={styles.meta}>{weather.description || ""}</p>
         </div>
     )
 }
@@ -67,8 +69,26 @@ const styles = {
     width: "100%",
     height: "100%",
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     color: "white",
+    padding: "8cqi",
+    textAlign: "center",
   },
+  label: {
+    margin: 0,
+    opacity: 0.75,
+    fontSize: "clamp(10px, 5cqi, 18px)",
+  },
+  temp: {
+    margin: "2cqi 0",
+    lineHeight: 1,
+    fontSize: "clamp(20px, 18cqi, 84px)",
+  },
+  meta: {
+    margin: 0,
+    opacity: 0.9,
+    fontSize: "clamp(10px, 5cqi, 18px)",
+  }
 }

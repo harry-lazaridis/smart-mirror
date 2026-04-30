@@ -8,6 +8,7 @@ import SLWidget from "../components/Mirror/SLWidget";
 import CalendarWidget from "../components/Mirror/CalendarWidget";
 import ClockWidget from "../components/Mirror/ClockWidget";
 import NewsWidget from "../components/Mirror/NewsWidget";
+import TodoWidget from "../components/Mirror/TodoWidget";
 import { onAuthStateChanged } from "firebase/auth";
 
 //Radera när vi deploy.
@@ -87,7 +88,7 @@ export default function Mirror() {
                 height: `${p.h * scaleY}%`,
               }}
             >
-              {renderWidget(p.id)}
+              <div style={styles.widgetInner}>{renderWidget(p.id)}</div>
             </div>
           );
         })}
@@ -109,6 +110,8 @@ function renderWidget(id) {
       return <CalendarWidget />;
     case "sl":
       return <SLWidget />;
+    case "todo":
+      return <TodoWidget />;
     default:
       return <div>Unknown</div>;
   }
@@ -134,20 +137,19 @@ const styles = {
   },
   widget: {
     position: "absolute",
-    background: "#000000", //#0c1e35
-    borderRadius: 6,
+    background: "rgba(15, 23, 42, 0.55)",
+    border: "1px solid rgba(148, 163, 184, 0.25)",
+    borderRadius: 12,
     overflow: "hidden",
     display: "flex",
-    outlineColor: "#FFF",
-    outlineStyle: "solid"
-    
+    containerType: "size",
+    backdropFilter: "blur(2px)",
   },
-  center: {
+  widgetInner: {
     width: "100%",
     height: "100%",
+    minWidth: 0,
+    minHeight: 0,
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "white",
   },
 };

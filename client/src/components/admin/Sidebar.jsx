@@ -2,9 +2,12 @@ import { auth } from "../../firebase";
 import { signOut } from "firebase/auth";
 
 const NAV_ITEMS = [
+  { id: "dashboard",  label: "Dashboard",  icon: "📊" },
   { id: "profile",  label: "Profile",  icon: "👤" },
   { id: "calendar", label: "Calendar", icon: "📅" },
   { id: "sl",       label: "SL Transport", icon: "🚇" },
+  { id: "news",     label: "News", icon: "📰" },
+  { id: "todo",     label: "Todo", icon: "✅" },
   { id: "widgets",  label: "Widgets",  icon: "🧩" },
   { id: "layout", label: "Mirror Layout", icon: "🖥️" },
   { id: "user",     label: "Account",  icon: "⚙️" },
@@ -53,7 +56,7 @@ export default function Sidebar({ activeTab, setActiveTab, mobileOpen }) {
       <div className="sidebar-bottom">
         <button className="logout-button" onClick={handleLogout}>
           <span className="nav-icon">🚪</span>
-          <span className="nav-label">Logga ut</span>
+          <span className="nav-label">Log out</span>
         </button>
       </div>
 

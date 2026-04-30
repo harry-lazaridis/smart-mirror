@@ -25,7 +25,7 @@ export default function Link() {
 
       if (!snap.exists()) {
         setStatus("error");
-        setMessage("Enheten hittades inte. Försök igen.");
+        setMessage("Device not found. Please try again.");
         return;
       }
 
@@ -39,7 +39,7 @@ export default function Link() {
       setStatus("success");
     } catch (err) {
       setStatus("error");
-      setMessage("Något gick fel: " + err.message);
+      setMessage("Something went wrong: " + err.message);
     }
   };
 
@@ -50,12 +50,12 @@ export default function Link() {
       await linkDevice(result.user);
     } catch (err) {
       setStatus("error");
-      setMessage("Inloggning misslyckades.");
+      setMessage("Login failed.");
     }
   };
 
   if (!deviceId) return (
-    <div style={styles.page}><p style={styles.error}>Ogiltig länk.</p></div>
+    <div style={styles.page}><p style={styles.error}>Invalid link.</p></div>
   );
 
   return (
@@ -64,21 +64,21 @@ export default function Link() {
 
       {status === "idle" && (
         <>
-          <p style={styles.subtitle}>Koppla spegeln till ditt konto</p>
+          <p style={styles.subtitle}>Connect mirror to your account</p>
           <button onClick={handleGoogleLogin} style={styles.googleBtn}>
-            Logga in med Google
+            Sign in with Google
           </button>
         </>
       )}
 
-      {status === "loading" && <p style={styles.subtitle}>Kopplar...</p>}
+      {status === "loading" && <p style={styles.subtitle}>Connecting...</p>}
 
       {status === "success" && (
         <>
           <div style={{ fontSize: 56, color: "#4ade80" }}>✓</div>
-          <h2 style={{ margin: 0 }}>Klart!</h2>
-          <p style={styles.subtitle}>Spegeln startar automatiskt.</p>
-          <p style={styles.subtitle}>Du kan stänga den här sidan.</p>
+          <h2 style={{ margin: 0 }}>Done!</h2>
+          <p style={styles.subtitle}>The mirror will start automatically.</p>
+          <p style={styles.subtitle}>You can close this page.</p>
         </>
       )}
 
@@ -86,7 +86,7 @@ export default function Link() {
         <>
           <p style={styles.error}>{message}</p>
           <button onClick={() => setStatus("idle")} style={styles.retryBtn}>
-            Försök igen
+            Try again
           </button>
         </>
       )}

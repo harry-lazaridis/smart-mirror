@@ -50,19 +50,19 @@ const minutesUntil = (dateValue) => {
 };
 
 //Decides what text should be shown for a departure time
-//Example: "5 min", "Nu", "Nyss", or "14:32"
+//Example: "5 min", "Now", "Just passed", or "14:32"
 const formatDepartureTime = (dep, convertTimeToMinutes) => {
   const departureTime = dep.expected ?? dep.scheduled;
   const minutes = minutesUntil(departureTime);
 
   if (convertTimeToMinutes && minutes !== null) {
-    if (minutes <= -1) return "Nyss";
-    if (minutes === 0) return "Nu";
+    if (minutes <= -1) return "Just passed";
+    if (minutes === 0) return "Now";
     return `${minutes} min`;
   }
 
   const date = toDate(departureTime);
-  return date ? date.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" }) : "-";
+  return date ? date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "-";
 };
 
 //Reads the journey direction from the SL response
@@ -90,6 +90,8 @@ const fetchDepartures = async (siteId, timewindow) => {
 };
 
 export default function SLWidget() {
+  const rootRef = useRef(null);
+
   //Stops chosen by the user in settings
   const [stops, setStops] = useState([]);
 
@@ -105,10 +107,31 @@ export default function SLWidget() {
 
   //Stores when the widget last successfully fetched data
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [layoutMode, setLayoutMode] = useState("vertical");
 
   //References to interval timers, so they can be cleared when the component unmounts
   const refreshTimer = useRef(null);
   const countdownTimer = useRef(null);
+
+  //Decide layout based on widget shape.
+  //Horizontal widgets show stop cards side by side, vertical widgets stack cards.
+  useEffect(() => {
+    const element = rootRef.current;
+    if (!element) return undefined;
+
+    const updateLayoutMode = () => {
+      const { width, height } = element.getBoundingClientRect();
+      if (!width || !height) return;
+      setLayoutMode(width >= height ? "horizontal" : "vertical");
+    };
+
+    updateLayoutMode();
+
+    const observer = new ResizeObserver(updateLayoutMode);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
 
   //Loads the user's saved stops and SL settings from Firebase when the widget first mounts
   useEffect(() => {
@@ -161,7 +184,7 @@ export default function SLWidget() {
         }))
 
         //Hide departures that recently passed, unless enabled in settings
-        .filter((dep) => showRecentlyPassed || dep.displayTime !== "Nyss")
+        .filter((dep) => showRecentlyPassed || dep.displayTime !== "Just passed")
 
         //Hide negative minute values, unless recently passed departures should be shown
         .filter((dep) => dep.minutesLeft === null || dep.minutesLeft >= 0 || showRecentlyPassed);
@@ -242,19 +265,19 @@ export default function SLWidget() {
   );
 
   //Loading state shown while Firebase or SL data is being loaded
-  if (loading) return <div className="sl-widget dimmed">Loading SL departures...</div>;
+  if (loading) return <div ref={rootRef} className={`sl-widget sl-widget--${layoutMode} dimmed`}>Loading SL departures...</div>;
 
   //Empty state shown when the user has not selected any stops
   if (stops.length === 0) {
-    return <div className="sl-widget dimmed">Choose an SL stop in settings to show departures.</div>;
+    return <div ref={rootRef} className={`sl-widget sl-widget--${layoutMode} dimmed`}>Choose an SL stop in settings to show departures.</div>;
   }
 
   return (
-    <div className="sl-widget">
+    <div ref={rootRef} className={`sl-widget sl-widget--${layoutMode}`}>
       {/* Shows either the latest update time or an SL error message */}
       {(settings.showLastUpdatedAlways || error) && (
         <div className="sl-last-updated">
-          {error ? `SL error: ${error}` : `Senast uppdaterad: ${lastUpdated?.toLocaleTimeString("sv-SE")}`}
+          {error ? `SL error: ${error}` : `Last updated: ${lastUpdated?.toLocaleTimeString("en-US")}`}
         </div>
       )}
 

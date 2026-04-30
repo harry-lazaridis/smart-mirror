@@ -3,9 +3,12 @@ import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 import Sidebar from "../components/admin/Sidebar";
+import DashboardOverview from "../components/admin/DashboardOverview";
 import ProfileCard from "../components/admin/ProfileCard";
 import CalendarSettings from "../components/admin/CalendarSettings";
 import SLSettings from "../components/admin/SLSettings";
+import NewsSettings from "../components/admin/NewsSettings";
+import TodoSettings from "../components/admin/TodoSettings";
 import WidgetManager from "../components/admin/WidgetManager";
 import UserManager from "../components/admin/UserManager";
 import WidgetLayout from "../components/admin/WidgetLayout";
@@ -16,7 +19,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") return "calendar";
-    return "profile";
+    return "dashboard";
   });
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -57,9 +60,12 @@ export default function Admin() {
 
       <main className="app-content" style={{ marginLeft: 245, padding: 32, width: "calc(100% - 245px)" }}>
         <div className="page">
+          {activeTab === "dashboard" && <DashboardOverview user={user} />}
           {activeTab === "profile"  && <ProfileCard user={user} />}
           {activeTab === "calendar" && <CalendarSettings user={user} />}
           {activeTab === "sl"       && <SLSettings user={user} />}
+          {activeTab === "news"     && <NewsSettings user={user} />}
+          {activeTab === "todo"     && <TodoSettings user={user} />}
           {activeTab === "widgets"  && <WidgetManager user={user} />}
           {activeTab === "layout" && <WidgetLayout user={user} />}
           {activeTab === "user"     && <UserManager user={user} />}

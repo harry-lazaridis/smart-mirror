@@ -56,7 +56,8 @@ router.get("/google/callback", async (req, res) => {
       { merge: true }
     );
 
-    res.redirect("http://localhost:5173/admin?calendar=connected");
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    res.redirect(`${clientUrl}/admin?calendar=connected`);
   } catch (err) {
     console.error(err);
     res.status(500).send("OAuth failed");
@@ -78,14 +79,6 @@ router.get("/google/calendar", async (req, res) => {
 
     oauth2Client.setCredentials(tokens);
 
-    // Auto-save refreshed tokens if they rotate
-    oauth2Client.on("tokens", async (newTokens) => {
-      await db.collection("users").doc(uid).set(
-        { googleTokens: { ...tokens, ...newTokens } },
-        { merge: true }
-      );
-    });
-
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
     const response = await calendar.events.list({
@@ -96,10 +89,48 @@ router.get("/google/calendar", async (req, res) => {
       orderBy: "startTime",
     });
 
-    res.json(response.data.items);
+    const freshCredentials = oauth2Client.credentials || {};
+    const hasTokenUpdates =
+      Object.keys(freshCredentials).length > 0 &&
+      JSON.stringify(freshCredentials) !== JSON.stringify(tokens);
+
+    if (hasTokenUpdates) {
+      await db.collection("users").doc(uid).set(
+        { googleTokens: { ...tokens, ...freshCredentials } },
+        { merge: true }
+      );
+    }
+
+    res.json(response.data.items || []);
   } catch (err) {
-    console.error("CALENDAR ERROR:", err);
-    res.status(500).json({ error: err.message });
+    const errorData = err?.response?.data;
+    const isInvalidGrant =
+      err?.message === "invalid_grant" ||
+      errorData?.error === "invalid_grant";
+
+    if (isInvalidGrant) {
+      try {
+        const decoded = await verifyToken(req);
+        await db.collection("users").doc(decoded.uid).set(
+          {
+            googleTokens: null,
+            connectedToCalendar: false,
+            googleReconnectRequired: true,
+          },
+          { merge: true }
+        );
+      } catch (cleanupError) {
+        console.error("CALENDAR TOKEN CLEANUP ERROR:", cleanupError?.message || cleanupError);
+      }
+
+      return res.status(401).json({
+        error: "Google token expired or revoked. Please reconnect your Google Calendar.",
+        code: "GOOGLE_RECONNECT_REQUIRED",
+      });
+    }
+
+    console.error("CALENDAR ERROR:", err?.message || err);
+    res.status(500).json({ error: "Failed to load calendar events" });
   }
 });
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { auth } from "../../firebase";
 
 export default function CalendarSettings() {
+  const backendBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
   const [connected, setConnected] = useState(false);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,8 +10,14 @@ export default function CalendarSettings() {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const token = await auth.currentUser.getIdToken();
-        const res = await fetch("http://localhost:3000/api/auth/google/calendar", {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          setConnected(false);
+          return;
+        }
+
+        const token = await currentUser.getIdToken();
+        const res = await fetch(`${backendBaseUrl}/api/auth/google/calendar`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -33,8 +40,11 @@ export default function CalendarSettings() {
   }, []);
 
   const connectGoogle = async () => {
-    const token = await auth.currentUser.getIdToken();
-    window.location.href = `http://localhost:3000/api/auth/google?token=${token}`;
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const token = await currentUser.getIdToken();
+    window.location.href = `${backendBaseUrl}/api/auth/google?token=${encodeURIComponent(token)}`;
   };
 
   if (loading) return <div className="settings-card"><p>Loading...</p></div>;

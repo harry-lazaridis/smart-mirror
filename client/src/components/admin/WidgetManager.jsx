@@ -3,17 +3,19 @@ import { auth, db } from "../../firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const WIDGETS = [
-  { id: "clock",    name: "Clock",         icon: "🕐", description: "Visar aktuell tid" },
-  { id: "calendar", name: "Calendar",      icon: "📅", description: "Kommande kalenderhändelser" },
-  { id: "sl",       name: "SL Departures", icon: "🚇", description: "Nästa avgångar från din hållplats" },
-  { id: "weather",  name: "Weather",       icon: "🌤", description: "Aktuellt väder" },
-  { id: "news",     name: "News",          icon: "📰", description: "Senaste nyheterna" },
+  { id: "clock",    name: "Clock",         icon: "🕐", description: "Shows current time" },
+  { id: "calendar", name: "Calendar",      icon: "📅", description: "Upcoming calendar events" },
+  { id: "sl",       name: "SL Departures", icon: "🚇", description: "Next departures from your selected stop" },
+  { id: "todo",     name: "Todo",          icon: "✅", description: "Your to-do list on the mirror" },
+  { id: "weather",  name: "Weather",       icon: "🌤", description: "Current weather" },
+  { id: "news",     name: "News",          icon: "📰", description: "Latest headlines" },
 ];
 
 const DEFAULT_POSITIONS = {
   clock:    { x: 10,  y: 10,  w: 250, h: 250 },
   calendar: { x: 10,  y: 100, w: 250, h: 250 },
   sl:       { x: 10,  y: 230, w: 250, h: 250 },
+  todo:     { x: 140, y: 230, w: 250, h: 250 },
   weather:  { x: 140, y: 10,  w: 250, h: 250 },
   news:     { x: 140, y: 100, w: 250, h: 250 },
 };
@@ -76,12 +78,12 @@ export default function WidgetManager() {
     <div>
       <div className="page-header">
         <h1>Widget layout</h1>
-        <p>{activeCount} av {WIDGETS.length} widgets aktiverade på spegeln.</p>
+        <p>{activeCount} of {WIDGETS.length} widgets enabled on the mirror.</p>
       </div>
 
       {/* Mirror size */}
       <div className="settings-card" style={{ marginBottom: 20 }}>
-        <h2>Spegelstorlek</h2>
+        <h2>Mirror size</h2>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <input
             type="number" value={mirrorW} min={200} max={1920}
@@ -170,7 +172,7 @@ export default function WidgetManager() {
       {/* Active summary */}
       {placed.length > 0 && (
         <div className="settings-card" style={{ marginBottom: 20 }}>
-          <h2>Aktiva widgets</h2>
+          <h2>Active widgets</h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {placed.map(p => {
               const w = WIDGETS.find(w => w.id === p.id);
@@ -196,11 +198,11 @@ export default function WidgetManager() {
 
       {/* Save */}
       <button onClick={save} disabled={loading} className="btn-primary" style={{ width: "100%", padding: 14, fontSize: 15 }}>
-        {loading ? "Sparar..." : saved ? "✓ Layout sparad!" : "Spara layout"}
+        {loading ? "Saving..." : saved ? "✓ Layout saved!" : "Save layout"}
       </button>
 
       <p style={{ marginTop: 12, fontSize: 12, color: "#9ca3af", textAlign: "center" }}>
-        Positioner och storlekar hanteras automatiskt baserat på senaste sparade layout.
+        Positions and sizes are managed automatically based on your latest saved layout.
       </p>
     </div>
   );

@@ -584,7 +584,7 @@ button {
 .sl-widget {
   width: 100%;
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-columns: 1fr !important;
   gap: 6px;
   align-items: start;
 }
@@ -596,4 +596,47 @@ button {
 .sl-stop-card {
   width: 100%;
   min-width: 0;
+}
+
+/* Mirror widget scaling */
+.sl-widget {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding: 4cqi;
+  gap: 4cqi;
+  font-size: clamp(10px, 3.8cqi, 16px);
+}
+
+.sl-widget--horizontal {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.sl-widget--vertical {
+  grid-template-columns: 1fr !important;
+}
+
+.sl-last-updated {
+  font-size: clamp(9px, 3.2cqi, 14px);
+  opacity: 0.75;
+}
+
+.sl-stop-title {
+  margin: 0 0 2cqi;
+  font-size: clamp(11px, 5cqi, 20px);
+}
+
+.sl-departure-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sl-departure-table td {
+  padding: 1.4cqi 0;
+  vertical-align: top;
+}
+
+.sl-line,
+.sl-time {
+  white-space: nowrap;
 }

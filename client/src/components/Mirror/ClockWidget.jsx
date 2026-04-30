@@ -10,46 +10,35 @@ export default function ClockWidget() {
 
   return (
     <div style={styles.center}>
-      <h2>{time.toLocaleTimeString()}</h2>
-      <h1>Hej aldina</h1>
+      <p style={styles.label}>Time</p>
+      <h1 style={styles.time}>{time.toLocaleTimeString("en-US")}</h1>
     </div>
   );
 }
 
 const styles = {
-  page: {
-    width: "100vw",
-    height: "100vh",
-    background: "black",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  canvas: {
-    position: "relative",
-    width: "100%",
-    height: "100%",
-    maxWidth: "100vw",
-    maxHeight: "100vh",
-    background: "#00000", //#020617
-    overflow: "hidden",
-  },
-  widget: {
-    position: "absolute",
-    background: "#000000", //#0c1e35
-    borderRadius: 6,
-    overflow: "hidden",
-    display: "flex",
-    outlineColor: "#FFF",
-    outlineStyle: "solid"
-    
-  },
   center: {
     width: "100%",
     height: "100%",
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     color: "white",
+    padding: "8cqi",
+    textAlign: "center",
+  },
+  label: {
+    margin: 0,
+    opacity: 0.7,
+    letterSpacing: "0.08em",
+    fontSize: "clamp(10px, 6cqi, 20px)",
+    textTransform: "uppercase",
+  },
+  time: {
+    margin: "3cqi 0 0",
+    lineHeight: 1.05,
+    fontWeight: 700,
+    fontSize: "clamp(18px, 15cqi, 72px)",
   },
 };

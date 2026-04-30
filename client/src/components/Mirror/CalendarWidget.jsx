@@ -6,29 +6,30 @@ import { auth } from "../../firebase";
 
 export default function CalendarWidget() {
     
-  const [connected, setConnected] = useState(false);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [needsReconnect, setNeedsReconnect] = useState(false);
 
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const token = await auth.currentUser.getIdToken();
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          setEvents([]);
+          return;
+        }
 
-        const res = await fetch("http://localhost:3000/api/auth/google/calendar", {
+        const token = await currentUser.getIdToken();
+        const res = await api.get("/api/auth/google/calendar", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const data = await res.json();
-        
-        if (res.ok) {
-          setConnected(true);
-          setEvents(data);
-        } else {
-          setConnected(false);
-        }
+        setEvents(Array.isArray(res.data) ? res.data : []);
+        setNeedsReconnect(false);
       } catch (err) {
-        console.error("checkConnection error:", err); // vad är felet?
+        const reconnectCode = err?.response?.data?.code;
+        setNeedsReconnect(reconnectCode === "GOOGLE_RECONNECT_REQUIRED");
+        setEvents([]);
       } finally {
         setLoading(false);
       }
@@ -43,21 +44,30 @@ export default function CalendarWidget() {
     }
   }, []);
 
-  /**
-   * Work around axios för att redirecta google api. kolla om det går bättre för att få in loading.
-   */
-  const connectGoogle = async () => {
-    const token = await auth.currentUser.getIdToken();
-    window.location.href = `http://localhost:3000/api/auth/google?token=${token}`;
+  const reconnectGoogle = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const token = await currentUser.getIdToken();
+    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+    window.location.href = `${baseURL}/api/auth/google?token=${encodeURIComponent(token)}`;
   };
 
   if (loading) return <div style={styles.card}>Loading...</div>;
+  if (needsReconnect) {
+    return (
+      <div style={styles.card}>
+        <p>Google Calendar needs to be reconnected.</p>
+        <button style={styles.button} onClick={reconnectGoogle}>Reconnect Google</button>
+      </div>
+    );
+  }
 
   //https://developers.google.com/workspace/calendar/api/v3/reference/events#resource
   
   return (
-        <div>
-          <h3>Upcoming events</h3>
+        <div style={styles.card}>
+          <h3 style={styles.heading}>Upcoming events</h3>
           {events.length === 0 && <p>No events today</p>}
           {events.map((event) => (
             <div key={event.id} style={styles.event}>
@@ -71,23 +81,28 @@ export default function CalendarWidget() {
 
 const styles = {
   card: {
-    padding: 20,
-    background: "#1e293b",
-    borderRadius: 12,
-    marginBottom: 20,
+    width: "100%",
+    height: "100%",
+    overflowY: "auto",
+    padding: "6cqi",
     color: "white",
+    fontSize: "clamp(11px, 4.5cqi, 18px)",
+  },
+  heading: {
+    margin: "0 0 4cqi",
+    fontSize: "clamp(12px, 6cqi, 24px)",
   },
   button: {
     marginTop: 10,
-    padding: "10px 15px",
+    padding: "2cqi 3cqi",
     cursor: "pointer",
     background: "#4285f4",
     color: "white",
     border: "none",
-    borderRadius: 8,
+    borderRadius: "1.8cqi",
   },
   event: {
-    padding: "10px 0",
+    padding: "2.6cqi 0",
     borderBottom: "1px solid #334155",
   },
 };

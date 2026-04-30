@@ -6,6 +6,7 @@ const WIDGETS = [
   { id: "clock",    name: "Clock",         icon: "🕐" },
   { id: "calendar", name: "Calendar",      icon: "📅" },
   { id: "sl",       name: "SL Departures", icon: "🚇" },
+  { id: "todo",     name: "Todo",          icon: "✅" },
   { id: "weather",  name: "Weather",       icon: "🌤" },
   { id: "news",     name: "News",          icon: "📰" },
 ];
@@ -166,12 +167,12 @@ export default function WidgetLayout() {
     <div>
       <div className="page-header">
         <h1>Mirror layout</h1>
-        <p>Placera och storleksändra widgets på spegelns yta.</p>
+        <p>Place and resize widgets on the mirror surface.</p>
       </div>
 
       {/* Mirror size */}
       <div className="settings-card" style={{ marginBottom: 16 }}>
-        <h2>Spegelstorlek</h2>
+        <h2>Mirror size</h2>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <input type="number" value={mirrorW} min={200} max={1920} className="settings-input"
             style={{ width: 90 }} onChange={(e) => setMirrorW(parseInt(e.target.value) || 200)} />
@@ -186,7 +187,7 @@ export default function WidgetLayout() {
       <div className="settings-card" style={{ marginBottom: 16 }}>
         <h2>Widgets</h2>
         <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 12 }}>
-          {isMobile() ? "Tryck för att lägga till på spegeln." : "Dra till spegeln eller tryck + för att lägga till."}
+          {isMobile() ? "Tap to add to the mirror." : "Drag to the mirror or press + to add."}
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {WIDGETS.map(w => {
@@ -251,7 +252,7 @@ export default function WidgetLayout() {
             {placed.length === 0 && (
               <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <p style={{ color: "#1e3a5f", fontSize: 13, margin: 0, textAlign: "center", padding: "0 20px" }}>
-                  Lägg till widgets ovan
+                  Add widgets above
                 </p>
               </div>
             )}
@@ -304,10 +305,10 @@ export default function WidgetLayout() {
             })}
           </div>
           <p style={{ marginTop: 8, fontSize: 11, color: "#9ca3af" }}>
-            Desktop: dra för att flytta · dra i hörnet för att ändra storlek · klicka för att välja
+            Desktop: drag to move · drag corner to resize · click to select
           </p>
           <p style={{ marginTop: 2, fontSize: 11, color: "#9ca3af" }}>
-            Mobil: tryck och dra för att flytta · välj widget nedan för exakta mått
+            Mobile: tap and drag to move · select widget below for exact dimensions
           </p>
         </div>
 
@@ -319,8 +320,8 @@ export default function WidgetLayout() {
             </h2>
 
             {[
-              { label: "Bredd (w)", field: "w" },
-              { label: "Höjd (h)",  field: "h" },
+              { label: "Width (w)", field: "w" },
+              { label: "Height (h)",  field: "h" },
               { label: "X",         field: "x" },
               { label: "Y",         field: "y" },
             ].map(({ label, field }) => (
@@ -335,7 +336,7 @@ export default function WidgetLayout() {
             ))}
 
             <button onClick={() => removeWidget(selected)} className="btn-danger" style={{ width: "100%", marginTop: 4 }}>
-              Ta bort
+              Remove
             </button>
           </div>
         )}
@@ -344,7 +345,7 @@ export default function WidgetLayout() {
       {/* Save */}
       <button onClick={save} disabled={loading} className="btn-primary"
         style={{ width: "100%", padding: 14, fontSize: 15, marginTop: 20 }}>
-        {loading ? "Sparar..." : saved ? "✓ Layout sparad!" : "Spara layout"}
+        {loading ? "Saving..." : saved ? "✓ Layout saved!" : "Save layout"}
       </button>
     </div>
   );

@@ -86,6 +86,7 @@ export default function Auth() {
           clock: true,
           calendar: true,
           sl: true,
+          todo: true,
         },
 
         //Kolla hur det borde lagras igenkligen.
@@ -93,6 +94,12 @@ export default function Auth() {
           from: "",
           to: ""
         }],
+
+        todos: [],
+        newsSettings: {
+          sources: ["svt", "sr_ekot"],
+          limit: 8,
+        },
 
         connectedToCalendar: false 
       })
