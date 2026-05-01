@@ -21,7 +21,7 @@ export default function Admin() {
     if (params.get("calendar") === "connected") return "calendar";
     return "dashboard";
   });
-  const [mobileOpen, setMobileOpen] = useState(false);
+  //const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
@@ -36,10 +36,10 @@ export default function Admin() {
     );
   }
 
-  return (
+  /*return (
     <div className="app-shell">
 
-      {/* Mobile header */}
+      {/* Mobile header *//*}
       <header className="mobile-header">
         <button className="hamburger-button" onClick={() => setMobileOpen(true)}>
           <span /><span /><span />
@@ -47,7 +47,7 @@ export default function Admin() {
         <span className="mobile-header-title">BlackMirror</span>
       </header>
 
-      {/* Overlay when mobile menu is open */}
+      {/* Overlay when mobile menu is open *//*}
       {mobileOpen && (
         <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />
       )}
@@ -59,6 +59,29 @@ export default function Admin() {
       />
 
       <main className="app-content" style={{ marginLeft: 245, padding: 32, width: "calc(100% - 245px)" }}>
+        <div className="page">
+          {activeTab === "dashboard" && <DashboardOverview user={user} />}
+          {activeTab === "profile"  && <ProfileCard user={user} />}
+          {activeTab === "calendar" && <CalendarSettings user={user} />}
+          {activeTab === "sl"       && <SLSettings user={user} />}
+          {activeTab === "news"     && <NewsSettings user={user} />}
+          {activeTab === "todo"     && <TodoSettings user={user} />}
+          {activeTab === "widgets"  && <WidgetManager user={user} />}
+          {activeTab === "layout" && <WidgetLayout user={user} />}
+          {activeTab === "user"     && <UserManager user={user} />}
+        </div>
+      </main>
+
+    </div>
+  );*/
+
+
+  return (
+    <div className="app-shell">
+
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab}/>
+
+      <main className="app-content">
         <div className="page">
           {activeTab === "dashboard" && <DashboardOverview user={user} />}
           {activeTab === "profile"  && <ProfileCard user={user} />}

@@ -16,12 +16,19 @@ body,
   margin: 0;
   min-height: 100%;
   width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   background: #f3f4f6;
   color: #111827;
   overflow-x: hidden;
+}
+
+body.sidebar-is-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
 }
 
 button,
@@ -63,6 +70,8 @@ button {
   flex-direction: column;
   z-index: 100;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar-top {
@@ -110,7 +119,7 @@ button {
 /* NAVIGATION */
 .sidebar-nav {
   display: flex;
-  flex-direction: column;   /* makes buttons vertical */
+  flex-direction: column;
   align-items: stretch;
   gap: 6px;
   padding: 14px 14px 0;
@@ -338,6 +347,7 @@ button {
 /* MOBILE */
 @media (max-width: 768px) {
   .mobile-header {
+    width: 100%;
     height: 64px;
     background: #071634;
     color: white;
@@ -345,9 +355,16 @@ button {
     align-items: center;
     gap: 14px;
     padding: 0 16px;
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 120;
+    left: 0;
+    z-index: 130;
+    transition: width 0.25s ease;
+  }
+
+  body.sidebar-is-open .mobile-header {
+    width: 270px;
+    max-width: 85vw;
   }
 
   .mobile-header-title {
@@ -365,6 +382,7 @@ button {
     gap: 4px;
     padding: 0 10px;
     background: rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
   }
 
   .hamburger-button span {
@@ -378,21 +396,42 @@ button {
   .app-content {
     margin-left: 0;
     width: 100%;
-    padding: 20px 16px 28px;
+    padding: 84px 16px 28px;
+    overflow-x: hidden;
   }
 
-  .sidebar.mobile {
+  .sidebar {
     width: 270px;
+    max-width: 85vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding-top: 64px;
     transform: translateX(-100%);
     transition: transform 0.25s ease;
+    z-index: 120;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
-  .sidebar.mobile.open {
+  .sidebar.open {
     transform: translateX(0);
   }
 
-  .sidebar.desktop {
-    transform: none;
+  .sidebar.open .sidebar-top {
+    display: none;
+  }
+
+  .sidebar-nav {
+    flex: 0 0 auto;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .sidebar-bottom {
+    margin-top: 0;
+    flex-shrink: 0;
   }
 
   .sidebar-overlay {
@@ -401,6 +440,8 @@ button {
     inset: 0;
     background: rgba(15, 23, 42, 0.45);
     z-index: 90;
+    overscroll-behavior: none;
+    touch-action: none;
   }
 
   .stats-grid {
@@ -411,6 +452,36 @@ button {
   .activity-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .settings-card,
+  .content-panel,
+  .activity-panel,
+  .stat-card {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .route-card {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .page,
+  .settings-input,
+  .dropdown,
+  .sl-widget,
+  .sl-stop-card {
+    max-width: 100%;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+
+  .page-header p {
+    font-size: 14px;
   }
 }
 
