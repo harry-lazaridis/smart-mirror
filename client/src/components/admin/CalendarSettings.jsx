@@ -220,7 +220,7 @@ export default function CalendarSettings() {
         }}>
           <p style={{marginBottom:10}}> Drag & drop a <strong>.csv</strong> or <strong>.ical</strong> calendar file here</p>
           <p style={{ fontSize: 12, color: "#6b7280"}}> or click to browse</p>
-          <input id="fileInput" type="file" accept=".csv,.ical" onChange={handleFileChange} style={{display:"none"}}/>
+          <input id="fileInput" type="file" accept=".csv,.ical, .ics,text/calendar,text/csv" onChange={handleFileChange} style={{display:"none"}}/>
 
           {file && (<p style={{ marginTop: 15 }}> Selected: <strong>{file.name}</strong></p>)}
 
