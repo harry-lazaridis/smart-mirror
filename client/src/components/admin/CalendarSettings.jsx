@@ -5,6 +5,7 @@ export default function CalendarSettings() {
   const backendBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
   const [connected, setConnected] = useState(false);
   const [events, setEvents] = useState([]);
+  const [uploadedEvents, setUploadedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [file, setFile] = useState(null);
@@ -25,8 +26,20 @@ export default function CalendarSettings() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        if (res.ok) { setConnected(true); setEvents(data); }
+
+        if(res.ok) { 
+          setConnected(true); 
+          setEvents(data); 
+        }
         else setConnected(false);
+
+        const uploadRes = await fetch(`${backendBaseUrl}/api/calendar/events`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const uploadData = await uploadRes.json();
+        setUploadedEvents(uploadData);
+
       } catch (err) {
         console.error("checkConnection error:", err);
       } finally {
@@ -154,7 +167,18 @@ export default function CalendarSettings() {
     }
   }
 
+  function formatDate(start){
+    if(!start) return "";
+    
+    if(typeof start === "string") return start;
 
+    if(start._seconds){
+      return new Date(start._seconds * 1000).toLocaleString();
+    }
+
+    if(start.dateTime) return start.dateTime;
+    if(start.date) return start.date;
+  }
 
   if (loading) return <div className="settings-card"><p>Loading...</p></div>;
 
@@ -187,11 +211,11 @@ export default function CalendarSettings() {
             {events.length === 0 && (
               <p style={{ color: "#6b7280" }}>No upcoming events.</p>
             )}
-            {events.map((event) => (
+            {[...events, ...uploadedEvents].map((event) => (
               <div key={event.id} style={{ padding: "12px 0", borderBottom: "1px solid #e5e7eb" }}>
                 <p style={{ margin: 0, fontWeight: 600, color: "#111827" }}>{event.summary || event.title}</p>
                 <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}>
-                  {event.start?.dateTime || event.start?.date || event.start}
+                  {formatDate(event.start)}
                 </p>
               </div>
             ))}
