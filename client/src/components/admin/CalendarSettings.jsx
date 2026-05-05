@@ -143,7 +143,7 @@ export default function CalendarSettings() {
       alert("File upload successful");
 
       const data = await res.json();
-      setEvents(data);
+      setEvents(prev => [...prev, ...data]);
 
       setFile(null);
     } catch(err) {
@@ -189,9 +189,9 @@ export default function CalendarSettings() {
             )}
             {events.map((event) => (
               <div key={event.id} style={{ padding: "12px 0", borderBottom: "1px solid #e5e7eb" }}>
-                <p style={{ margin: 0, fontWeight: 600, color: "#111827" }}>{event.summary}</p>
+                <p style={{ margin: 0, fontWeight: 600, color: "#111827" }}>{event.summary || event.title}</p>
                 <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}>
-                  {event.start?.dateTime ?? event.start?.date}
+                  {event.start?.dateTime || event.start?.date || event.start}
                 </p>
               </div>
             ))}
@@ -220,7 +220,7 @@ export default function CalendarSettings() {
         }}>
           <p style={{marginBottom:10}}> Drag & drop a <strong>.csv</strong> or <strong>.ical</strong> calendar file here</p>
           <p style={{ fontSize: 12, color: "#6b7280"}}> or click to browse</p>
-          <input id="fileInput" type="file" accept=".csv,.ical, .ics,text/calendar,text/csv" onChange={handleFileChange} style={{display:"none"}}/>
+          <input id="fileInput" type="file" accept=".csv,.ical,.ics,text/calendar,text/csv" onChange={handleFileChange} style={{display:"none"}}/>
 
           {file && (<p style={{ marginTop: 15 }}> Selected: <strong>{file.name}</strong></p>)}
 
