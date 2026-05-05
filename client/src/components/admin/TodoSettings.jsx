@@ -271,8 +271,6 @@ export default function TodoSettings() {
           </div>
         </div>
       )}
-      
-      {/* Optional: Show all other completed tasks if needed, but per requirements we just need Done Today. We'll leave purely old done tasks alone for now. */}
     </div>
   );
 }
