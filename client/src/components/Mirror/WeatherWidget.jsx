@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { api } from "../../api/client.js";
 
 export default function WeatherWidget() {
-
     /*
         // https://dev.to/choiruladamm/how-to-use-geolocation-api-using-reactjs-ndk
         [x] Create a form for the user to pass in current location if 'navigator' does not work
@@ -43,23 +42,22 @@ export default function WeatherWidget() {
     if (loading) { return <div style={styles.center}><p style={styles.meta}>Loading weather...</p></div>}
     if (error) { return <div style={styles.center}><p style={styles.meta}>{String(error)}</p></div>}
 
-
-    /*
-
-    res.json({
-      temp:        convertKelvinToCelcius(result.main.temp),
-      feels_like:  convertKelvinToCelcius(result.main.feels_like),
-      description: result.weather[0].description,
-      city:        result.name,
-      icon:        result.weather[0].icon,
-    });
-
-    */
     return (
         <div style={styles.center}>
             <p style={styles.label}>{weather.city || "Local weather"}</p>
             <h1 style={styles.temp}>{weather.temp}°C</h1>
             <p style={styles.meta}>{weather.description || ""}</p>
+
+            {weather.forecast?.length > 0 && (
+                <div style={styles.forecastRow}>
+                    {weather.forecast.map((item) => (
+                        <div key={item.time} style={styles.forecastItem}>
+                            <p style={styles.forecastTime}>{item.time}</p>
+                            <p style={styles.forecastTemp}>{item.temp}°C</p>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }
@@ -90,5 +88,27 @@ const styles = {
     margin: 0,
     opacity: 0.9,
     fontSize: "clamp(10px, 5cqi, 18px)",
+  },
+  forecastRow: {
+    marginTop: "4cqi",
+    display: "flex",
+    gap: "5cqi",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  forecastItem: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  forecastTime: {
+    margin: 0,
+    opacity: 0.7,
+    fontSize: "clamp(9px, 4cqi, 14px)",
+  },
+  forecastTemp: {
+    margin: 0,
+    fontWeight: 600,
+    fontSize: "clamp(11px, 5cqi, 18px)",
   }
 }

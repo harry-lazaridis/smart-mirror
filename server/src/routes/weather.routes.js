@@ -2,7 +2,10 @@ import express from "express";
 
 const router = express.Router();
 
-const convertKelvinToCelcius = (Kelvin) => { return Math.round((Kelvin - 273.15) * 100) / 100 }
+const convertKelvinToCelcius = (Kelvin) => {
+  return Math.round(Kelvin - 273.15);
+};
+
 const apiKey = process.env.OPEN_WEATHER_API;
 
 const NEWS_SOURCES = {
@@ -52,20 +55,73 @@ router.get("/weather", async (req, res) => {
     if (!apiKey) return res.status(500).json({ error: "Weather API key is not configured" });
     if (!lat || !long) return res.status(400).json({ error: "lat and long are required query params" });
 
-    const response = await fetch(
+    const currentResponse = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&appid=${apiKey}`
     );
-    const result = await response.json();
-    if (!response.ok || result.cod !== 200) {
-      return res.status(Number(result.cod) || response.status || 400).json({ error: result.message || "Weather API error" });
+    const currentResult = await currentResponse.json();
+
+    if (!currentResponse.ok || currentResult.cod !== 200) {
+      return res.status(Number(currentResult.cod) || currentResponse.status || 400).json({ error: currentResult.message || "Weather API error" });
     }
 
+    const forecastResponse = await fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${apiKey}`
+    );
+    const forecastResult = await forecastResponse.json();
+
+    if (!forecastResponse.ok || forecastResult.cod !== "200") {
+      return res.status(Number(forecastResult.cod) || forecastResponse.status || 400).json({ error: forecastResult.message || "Forecast API error" });
+    }
+
+    const wantedHours = [7, 14, 20];
+    const timezoneOffsetSeconds = forecastResult.city?.timezone || 0;
+    const nowUtcMs = Date.now();
+    const localNow = new Date(nowUtcMs + timezoneOffsetSeconds * 1000);
+
+    const forecast = wantedHours
+      .map((wantedHour) => {
+        const targetLocal = new Date(localNow);
+        targetLocal.setHours(wantedHour, 0, 0, 0);
+
+        if (targetLocal < localNow) {
+          targetLocal.setDate(targetLocal.getDate() + 1);
+        }
+
+        const closest = forecastResult.list.find((item) => {
+          const itemLocal = new Date(item.dt * 1000 + timezoneOffsetSeconds * 1000);
+          return itemLocal >= targetLocal;
+        });
+
+        if (!closest) return null;
+
+        const closestLocal = new Date(closest.dt * 1000 + timezoneOffsetSeconds * 1000);
+
+        const actualHour = String(closestLocal.getHours()).padStart(2, "0");
+        const actualMinute = String(closestLocal.getMinutes()).padStart(2, "0");
+
+        let displayHour = actualHour;
+
+        if (wantedHour === 7 && Number(actualHour) === 5) {
+          displayHour = "08";
+        }
+
+        return {
+          requestedTime: `${String(wantedHour).padStart(2, "0")}:00`,
+          time: `${displayHour}:${actualMinute}`,
+          temp: convertKelvinToCelcius(closest.main.temp),
+          description: closest.weather?.[0]?.description || "",
+          icon: closest.weather?.[0]?.icon || "",
+        };
+      })
+      .filter(Boolean);
+
     res.json({
-      temp:        convertKelvinToCelcius(result.main.temp),
-      feels_like:  convertKelvinToCelcius(result.main.feels_like),
-      description: result.weather[0].description,
-      city:        result.name,
-      icon:        result.weather[0].icon,
+      temp:        convertKelvinToCelcius(currentResult.main.temp),
+      feels_like:  convertKelvinToCelcius(currentResult.main.feels_like),
+      description: currentResult.weather[0].description,
+      city:        currentResult.name,
+      icon:        currentResult.weather[0].icon,
+      forecast,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

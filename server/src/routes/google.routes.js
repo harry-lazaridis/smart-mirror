@@ -33,7 +33,7 @@ router.get("/google", async (req, res) => {
     const url = oauth2Client.generateAuthUrl({
       access_type: "offline",
       prompt: "consent",
-      scope: ["https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/tasks"],
+      scope: ["https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/tasks.readonly"],
       state: decoded.uid,
     });
 
@@ -82,9 +82,15 @@ router.get("/google/calendar", async (req, res) => {
 
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
+    var date = new Date();
+
+    // add a day
+    date.setDate(date.getDate() + 1);
+
     const response = await calendar.events.list({
       calendarId: "primary",
       timeMin: new Date().toISOString(),
+      timeMax: date,
       maxResults: 10,
       singleEvents: true,
       orderBy: "startTime",
@@ -208,12 +214,17 @@ router.get("/google/tasks", async (req, res) => {
 
     res.json(allTasks);
   } catch (err) {
-    console.error("TASKS ERROR:", err?.response?.data || err?.message || err);
+  console.error("TASKS ERROR FULL:", {
+    message: err?.message,
+    code: err?.code,
+    status: err?.response?.status,
+    data: err?.response?.data,
+  });
 
-    res.status(500).json({
-      error: "Failed to load Google Tasks",
-    });
+  res.status(500).json({
+    error: "Failed to load Google Tasks",
+    details: err?.response?.data || err?.message,
+  });
   }
 });
-
 export default router;
