@@ -156,7 +156,7 @@ export default function CalendarSettings() {
       alert("File upload successful");
 
       const data = await res.json();
-      setEvents(prev => [...prev, ...data]);
+      setUploadedEvents(prev => [...prev, ...data]);
 
       setFile(null);
     } catch(err) {
@@ -176,11 +176,41 @@ export default function CalendarSettings() {
       return new Date(start._seconds * 1000).toLocaleString();
     }
 
-    if(start.dateTime) return start.dateTime;
-    if(start.date) return start.date;
+    if(start.dateTime){
+      return new Date(start.dateTime).toLocaleString();
+    };
+    if(start.date){
+      return new Date(start.date).toLocaleDateString();
+    };
+  }
+
+  function getEventDate(event) {
+    const start = event.start;
+
+    if(start?.dateTime){
+      return new Date(start.dateTime);
+    }
+
+    if(start?.date){
+      return new Date(start.date);
+    }
+
+    if(start?._seconds){
+      return new Date(start._seconds * 1000);
+    }
+
+    if(typeof start === "string"){
+      return new Date(start);
+    }
+
+    return new Date(0);
   }
 
   if (loading) return <div className="settings-card"><p>Loading...</p></div>;
+
+  const allEvents = [...events, ...uploadedEvents].sort(
+    (a,b) => getEventDate(a) - getEventDate(b)
+  );
 
   return (
     <div>
@@ -205,13 +235,13 @@ export default function CalendarSettings() {
           </button>
         )}
 
-        {connected && (
+        {allEvents.length > 0 && (
           <div>
             <h3>Upcoming events</h3>
-            {events.length === 0 && (
+            {allEvents.length === 0 && (
               <p style={{ color: "#6b7280" }}>No upcoming events.</p>
             )}
-            {[...events, ...uploadedEvents].map((event) => (
+            {allEvents.map((event) => (
               <div key={event.id} style={{ padding: "12px 0", borderBottom: "1px solid #e5e7eb" }}>
                 <p style={{ margin: 0, fontWeight: 600, color: "#111827" }}>{event.summary || event.title}</p>
                 <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}>
