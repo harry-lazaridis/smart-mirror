@@ -11,7 +11,7 @@ export default function ClockWidget() {
   return (
     <div style={styles.center}>
       <p style={styles.label}>Time</p>
-      <h1 style={styles.time}>{time.toLocaleTimeString("en-US")}</h1>
+      <h1 style={styles.time}>{time.toLocaleTimeString("sv-SE", {hour12: false,})}</h1>
     </div>
   );
 }

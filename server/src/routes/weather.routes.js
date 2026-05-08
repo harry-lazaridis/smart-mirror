@@ -73,44 +73,44 @@ router.get("/weather", async (req, res) => {
       return res.status(Number(forecastResult.cod) || forecastResponse.status || 400).json({ error: forecastResult.message || "Forecast API error" });
     }
 
-    const wantedHours = [7, 14, 20];
     const timezoneOffsetSeconds = forecastResult.city?.timezone || 0;
-    const nowUtcMs = Date.now();
-    const localNow = new Date(nowUtcMs + timezoneOffsetSeconds * 1000);
 
-    const forecast = wantedHours
-      .map((wantedHour) => {
-        const targetLocal = new Date(localNow);
-        targetLocal.setHours(wantedHour, 0, 0, 0);
+    const targetForecasts = [
+      { hour: 8, display: "08:00" },
+      { hour: 14, display: "14:00" },
+      { hour: 20, display: "20:00" },
+    ];
 
-        if (targetLocal < localNow) {
+    const nowLocal = new Date(Date.now() + timezoneOffsetSeconds * 1000);
+
+    const forecast = targetForecasts
+      .map(({ hour, display }) => {
+        const targetLocal = new Date(nowLocal);
+        targetLocal.setHours(hour, 0, 0, 0);
+
+        if (targetLocal < nowLocal) {
           targetLocal.setDate(targetLocal.getDate() + 1);
         }
 
-        const closest = forecastResult.list.find((item) => {
+        const match = forecastResult.list.find((item) => {
           const itemLocal = new Date(item.dt * 1000 + timezoneOffsetSeconds * 1000);
-          return itemLocal >= targetLocal;
+
+          return (
+            itemLocal.getUTCFullYear() === targetLocal.getUTCFullYear() &&
+            itemLocal.getUTCMonth() === targetLocal.getUTCMonth() &&
+            itemLocal.getUTCDate() === targetLocal.getUTCDate() &&
+            itemLocal.getUTCHours() === hour
+          );
         });
 
-        if (!closest) return null;
-
-        const closestLocal = new Date(closest.dt * 1000 + timezoneOffsetSeconds * 1000);
-
-        const actualHour = String(closestLocal.getHours()).padStart(2, "0");
-        const actualMinute = String(closestLocal.getMinutes()).padStart(2, "0");
-
-        let displayHour = actualHour;
-
-        if (wantedHour === 7 && Number(actualHour) === 5) {
-          displayHour = "08";
-        }
+        if (!match) return null;
 
         return {
-          requestedTime: `${String(wantedHour).padStart(2, "0")}:00`,
-          time: `${displayHour}:${actualMinute}`,
-          temp: convertKelvinToCelcius(closest.main.temp),
-          description: closest.weather?.[0]?.description || "",
-          icon: closest.weather?.[0]?.icon || "",
+          time: display,
+          temp: convertKelvinToCelcius(match.main.temp),
+          description: match.weather?.[0]?.description || "",
+          icon: match.weather?.[0]?.icon || "",
+          openWeatherTime: match.dt_txt,
         };
       })
       .filter(Boolean);
