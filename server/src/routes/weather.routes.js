@@ -2,8 +2,8 @@ import express from "express";
 
 const router = express.Router();
 
-const convertKelvinToCelcius = (Kelvin) => {
-  return Math.round(Kelvin - 273.15);
+const convertKelvinToCelcius = (temp) => {
+  return Math.round(temp);
 };
 
 const apiKey = process.env.OPEN_WEATHER_API;
@@ -56,7 +56,7 @@ router.get("/weather", async (req, res) => {
     if (!lat || !long) return res.status(400).json({ error: "lat and long are required query params" });
 
     const currentResponse = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&appid=${apiKey}`
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&appid=${apiKey}&units=metric`
     );
     const currentResult = await currentResponse.json();
 
@@ -65,7 +65,7 @@ router.get("/weather", async (req, res) => {
     }
 
     const forecastResponse = await fetch(
-      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${apiKey}`
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${apiKey}&units=metric`
     );
     const forecastResult = await forecastResponse.json();
 
@@ -133,7 +133,7 @@ router.get("/weather/:city", async (req, res) => {
         const { city } = req.params;
         if (!apiKey) return res.status(500).json({ error: "Weather API key is not configured" });
 
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}`);
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`);
         const result = await response.json();
 
         if (!response.ok || !result.main?.temp) {

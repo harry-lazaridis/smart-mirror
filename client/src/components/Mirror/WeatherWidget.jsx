@@ -13,31 +13,44 @@ export default function WeatherWidget() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!navigator.geolocation) {
-            setError("Location unable to fetch");
-            setLoading(false);
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-                try {
-                    const { latitude, longitude } = pos.coords;
-
-                    const res = await api.get("/api/util/weather", {
-                        params: { lat: latitude, long: longitude}
-                    });
-
-                    setWeather(res.data);
-                } catch (error) { setError(error); }
-                finally { setLoading(false); }
-            },
-            (error) => {
-                setError("Error: " + error.message);
-                setLoading(false)
+        const fetchWeather = async () => {
+            if (!navigator.geolocation) {
+                setError("Location unable to fetch");
+                setLoading(false);
+                return;
             }
-        )
-    }, [])
+
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    try {
+                        const { latitude, longitude } = pos.coords;
+
+                        const res = await api.get("/api/util/weather", {
+                            params: { lat: latitude, long: longitude}
+                        });
+
+                        setWeather(res.data);
+                    } catch (error) {
+                        setError(error);
+                    } finally {
+                        setLoading(false);
+                    }
+                },
+                (error) => {
+                    setError("Error: " + error.message);
+                    setLoading(false);
+                }
+            );
+        };
+
+        fetchWeather();
+
+        const interval = setInterval(() => {
+            fetchWeather();
+        }, 15 * 60 * 1000); // every 15 minutes
+
+        return () => clearInterval(interval);
+    }, []);
 
     if (loading) { return <div style={styles.center}><p style={styles.meta}>Loading weather...</p></div>}
     if (error) { return <div style={styles.center}><p style={styles.meta}>{String(error)}</p></div>}

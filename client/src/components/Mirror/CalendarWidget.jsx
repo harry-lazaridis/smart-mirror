@@ -10,6 +10,33 @@ export default function CalendarWidget() {
   const [loading, setLoading] = useState(true);
   const [needsReconnect, setNeedsReconnect] = useState(false);
 
+  const formatEventDate = (event) => {
+    const rawDate = event.start?.dateTime ?? event.start?.date;
+    if (!rawDate) return "";
+
+    const date = new Date(rawDate);
+
+    return date.toLocaleDateString("en-EN", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+    });
+  };
+
+  const formatEventTime = (event) => {
+    const rawDate = event.start?.dateTime;
+
+    if (!rawDate) return "All day";
+
+    const date = new Date(rawDate);
+
+    return date.toLocaleTimeString("sv-SE", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
+
   useEffect(() => {
     const checkConnection = async () => {
       try {
@@ -37,11 +64,17 @@ export default function CalendarWidget() {
 
     checkConnection();
 
+    const interval = setInterval(() => {
+      checkConnection();
+    }, 15 * 60 * 1000); // every 15 minutes calender update
+
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") {
       checkConnection();
-      window.history.replaceState({}, "", "/admin"); //Fråga inte varför
+      window.history.replaceState({}, "", "/admin");
     }
+
+    return () => clearInterval(interval);
   }, []);
 
   const reconnectGoogle = async () => {
@@ -72,7 +105,11 @@ export default function CalendarWidget() {
           {events.map((event) => (
             <div key={event.id} style={styles.event}>
               <strong>{event.summary}</strong>
-              <p>{event.start?.dateTime ?? event.start?.date}</p>
+
+              <div style={styles.dateTimeRow}>
+                <span style={styles.date}>{formatEventDate(event)}</span>
+                <span style={styles.time}>{formatEventTime(event)}</span>
+              </div>
             </div>
           ))}
         </div> 
@@ -104,5 +141,19 @@ const styles = {
   event: {
     padding: "2.6cqi 0",
     borderBottom: "1px solid #334155",
+  },
+  dateTimeRow: {
+    marginTop: "1.2cqi",
+    display: "flex",
+    gap: "2cqi",
+    alignItems: "center",
+  },
+  date: {
+    opacity: 1,
+    fontSize: "clamp(10px, 4cqi, 16px)",
+  },
+  time: {
+    fontWeight: 700,
+    fontSize: "clamp(11px, 4.5cqi, 18px)",
   },
 };
