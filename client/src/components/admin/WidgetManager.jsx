@@ -9,6 +9,7 @@ const WIDGETS = [
   { id: "todo",     name: "Todo",          icon: "✅", description: "Your to-do list on the mirror" },
   { id: "weather",  name: "Weather",       icon: "🌤", description: "Current weather" },
   { id: "news",     name: "News",          icon: "📰", description: "Latest headlines" },
+  { id: "quotes",   name: "Qoutes",        icon: ""  , description: "Daily Qoutes"},
 ];
 
 const DEFAULT_POSITIONS = {
@@ -18,6 +19,7 @@ const DEFAULT_POSITIONS = {
   todo:     { x: 140, y: 230, w: 250, h: 250 },
   weather:  { x: 140, y: 10,  w: 250, h: 250 },
   news:     { x: 140, y: 100, w: 250, h: 250 },
+  quotes:   { x: 10,  y: 230, w: 250, h: 250 },
 };
 
 export default function WidgetManager() {

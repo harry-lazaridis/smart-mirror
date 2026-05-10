@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { id: "sl", label: "SL Transport", icon: "🚇" },
   { id: "news", label: "News", icon: "📰" },
   { id: "todo", label: "Todo", icon: "✅" },
+  { id: "quotes", label: "Quotes", icon: " "},
   { id: "widgets", label: "Widgets", icon: "🧩" },
   { id: "layout", label: "Mirror Layout", icon: "🖥️" },
   { id: "user", label: "Account", icon: "⚙️" },
