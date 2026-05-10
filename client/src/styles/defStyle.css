@@ -748,3 +748,14 @@ button {
   color: #111827;
 
 }
+
+@media (max-width: 600px) {
+  .quotes-grid {
+    grid-template-columns: auto;
+
+  }
+
+  .quotes-card {
+    width: 100%;
+  }
+}

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { auth, db } from "../../firebase";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const quoteTypes = [
     "Motivational",
@@ -21,6 +23,41 @@ export default function QuoteSettings(){
          "Mindfulness": true,
     });
 
+    useEffect(() => {
+        const load = async () => {
+          const uid = auth.currentUser?.uid;
+          if (!uid) return;
+          const snap = await getDoc(doc(db, "users", uid));
+          const data = snap.data()?.quoteSettings?.activeQuotes;
+          if (data) {
+            setActiveQuotes(data);
+           
+          }
+        };
+        load();
+      }, []);
+
+
+  const toggle = async (type) => {
+      const updated = { ...activeQuotes, [type]: !activeQuotes[type],};
+
+      setActiveQuotes(updated);
+
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    //console.log("testing to save quote settings", uid, updated);
+
+      await setDoc(doc(db, "users", uid), {
+        quoteSettings: { activeQuotes: updated,},
+      },
+      {merge: true}
+      );
+    
+  };
+
+  
+ 
+
     return(
         <div>
              <div className="page-header">
@@ -38,10 +75,8 @@ export default function QuoteSettings(){
                     <span className="quotes-title">{type}</span>
                  <button
 
-                 onClick={() =>
-                    setActiveQuotes((prev)=> ({ ...prev, [type]: !prev[type],
-                    }))
-                 }
+                 onClick={() => toggle(type)}
+
                   style={{
                     width: 48, height: 26, borderRadius: 999,
                     background: active ? "#2563eb" : "#d1d5db",
