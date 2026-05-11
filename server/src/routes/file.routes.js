@@ -84,4 +84,35 @@ router.get("/events", authMiddleware, async (req, res) => {
     }
 });
 
+router.delete("/events/:id", authMiddleware, async (req, res) => {
+    try {
+        const uid = req.user.uid;
+        const eventId = req.params.id;
+
+        const eventRef = db
+        .collection("users")
+        .doc(uid)
+        .collection("events")
+        .doc(eventId);
+
+        const doc = await eventRef.get();
+
+        if(!doc.exists) {
+            return res.status(400).json({ error: "Event not found" });
+        }
+
+        await eventRef.delete();
+
+        res.json({
+            success: true,
+            message: "Event deleted",
+        });
+    } catch(err){
+        console.error("DELETE EVENT ERROR: ", err);
+        res.status(500).json({
+            error:"Failed to delete event",
+        });
+    }
+});
+
 export default router;

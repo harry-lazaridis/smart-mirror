@@ -167,6 +167,36 @@ export default function CalendarSettings() {
     }
   }
 
+  async function handleDeleteEvent(eventId){
+    try {
+      const currentUser = auth.currentUser;
+      if(!currentUser) throw new Error("Not logged in");
+
+      const token = await currentUser.getIdToken();
+
+      const res = await fetch(
+        `${backendBaseUrl}/api/calendar/events/${eventId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if(!res.ok){
+        throw new Error("Failed to delete event");
+      }
+
+      setUploadedEvents((prev) =>
+        prev.filter((event) => event.id !==eventId)
+      );
+    } catch(err){
+      console.error(err);
+      alert("Failed to delete event");
+    }
+  }
+
   function formatDate(start){
     if(!start) return "";
     
@@ -241,14 +271,37 @@ export default function CalendarSettings() {
             {allEvents.length === 0 && (
               <p style={{ color: "#6b7280" }}>No upcoming events.</p>
             )}
-            {allEvents.map((event) => (
-              <div key={event.id} style={{ padding: "12px 0", borderBottom: "1px solid #e5e7eb" }}>
-                <p style={{ margin: 0, fontWeight: 600, color: "#111827" }}>{event.summary || event.title}</p>
-                <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}>
-                  {formatDate(event.start)}
-                </p>
-              </div>
-            ))}
+            {allEvents.map((event) => {
+              const isUploadedEvent = uploadedEvents.some(
+                (uploaded) => uploaded.id === event.id
+              );
+              return (
+                <div key={event.id} style={{ padding: "12px 0", borderBottom: "1px solid #e5e7eb", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 600, color: "#111827" }}>{event.summary || event.title}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}>
+                      {formatDate(event.start)}
+                    </p>
+                  </div>
+                  {isUploadedEvent && (
+                    <button
+                      onClick={() => handleDeleteEvent(event.id)}
+                      style = {{
+                        background: "#dc2626",
+                        color: "white",
+                        border: "none",
+                        borderRadius: 6,
+                        padding: "6px 10px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Delete
+                    </button>
+
+                  )}
+                </div>
+                )
+            })}
           </div>
         )}
       </div>
