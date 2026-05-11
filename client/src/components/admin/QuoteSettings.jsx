@@ -14,7 +14,7 @@ const quoteTypes = [
 ];
 
 export default function QuoteSettings(){
-    const [activeQuotes, setActiveQuotes] = useState({
+    const [activeQuoteTypes, setActiveQuoteTypes] = useState({
         "Motivational": true,
         "Positive Thinking": true,
          "Wisdom": true,
@@ -28,9 +28,9 @@ export default function QuoteSettings(){
           const uid = auth.currentUser?.uid;
           if (!uid) return;
           const snap = await getDoc(doc(db, "users", uid));
-          const data = snap.data()?.quoteSettings?.activeQuotes;
+          const data = snap.data()?.quoteSettings?.activeQuoteTypes;
           if (data) {
-            setActiveQuotes(data);
+            setActiveQuoteTypes(data);
            
           }
         };
@@ -39,16 +39,16 @@ export default function QuoteSettings(){
 
 
   const toggle = async (type) => {
-      const updated = { ...activeQuotes, [type]: !activeQuotes[type],};
+      const updated = { ...activeQuoteTypes, [type]: !activeQuoteTypes[type],};
 
-      setActiveQuotes(updated);
+      setActiveQuoteTypes(updated);
 
     const uid = auth.currentUser?.uid;
     if (!uid) return;
     //console.log("testing to save quote settings", uid, updated);
 
       await setDoc(doc(db, "users", uid), {
-        quoteSettings: { activeQuotes: updated,},
+        quoteSettings: { activeQuoteTypes: updated,},
       },
       {merge: true}
       );
@@ -67,7 +67,7 @@ export default function QuoteSettings(){
 
              <div className="quotes-grid">
                 {quoteTypes.map((type) => {
-                const active = activeQuotes[type];
+                const active = activeQuoteTypes[type];
 
                 return(
                 <div className="quotes-card" key={type}>
