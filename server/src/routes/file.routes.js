@@ -66,18 +66,51 @@ router.get("/events", authMiddleware, async (req, res) => {
     try {
         const uid = req.user.uid;
 
-        const snapshot = await db
+        const eventsRef = await db
             .collection("users")
             .doc(uid)
-            .collection("events")
-            .get();
-        
-        const events = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
+            .collection("events");
 
-        res.json(events);
+        const snapshot = await eventsRef.get();
+
+        const now = new Date();
+
+        const batch = db.batch();
+        const validEvents = [];
+        
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            let eventDate = null;
+
+            if(data.start?.dateTime){
+                eventDate = new Date(data.start.dateTime);
+            }else if(data.start?.date){
+                eventDate = new Date(data.start.date);
+            }else if(data.start?._seconds){
+                eventDate = new Date(data.start._seconds * 1000);
+            }else if(typeof data.start ==="string"){
+                eventDate = new Date(data.start);
+            }
+
+            if(!eventDate || isNaN(eventDate.getTime())) {
+                batch.delete(doc.ref);
+                return;
+            }
+
+            if(eventDate < now){
+                batch.delete(doc.ref);
+                return;
+            }
+
+            validEvents.push({
+                id: doc.id,
+                ...data,
+            });
+        });
+
+        await batch.commit();
+
+        res.json(validEvents);
     } catch(err) {
         console.error(err);
         res.status(500).json({ error: "Failed to fetch uploaded events"})
