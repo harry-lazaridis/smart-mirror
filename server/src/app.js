@@ -17,7 +17,7 @@ app.use(express.json());
 app.use("/api/auth", googleRoutes);
 app.use("/api/util", weatherRoutes);
 app.use("/api/calendar", fileRoutes);
-
+// /api/calendar/events
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });

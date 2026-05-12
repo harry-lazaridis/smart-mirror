@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+
+const DEFAULT_LOOKAHEAD_DAYS = 3;
+const MAX_LOOKAHEAD_DAYS = 30;
 
 export default function CalendarSettings() {
   const backendBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
@@ -11,6 +15,8 @@ export default function CalendarSettings() {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [lookaheadDays, setLookaheadDays] = useState(DEFAULT_LOOKAHEAD_DAYS);
+  const [savingLookahead, setSavingLookahead] = useState(false);
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -22,6 +28,14 @@ export default function CalendarSettings() {
         }
 
         const token = await currentUser.getIdToken();
+        const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+        const rawLookahead = Number(userSnap.data()?.calendarLookaheadDays);
+        setLookaheadDays(
+          Number.isFinite(rawLookahead)
+            ? Math.min(Math.max(Math.floor(rawLookahead), 1), MAX_LOOKAHEAD_DAYS)
+            : DEFAULT_LOOKAHEAD_DAYS
+        );
+
         const res = await fetch(`${backendBaseUrl}/api/auth/google/calendar`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -30,16 +44,23 @@ export default function CalendarSettings() {
         if(res.ok) { 
           setConnected(true); 
           setEvents(data); 
+          await setDoc(
+            doc(db, "users", currentUser.uid),
+            {
+              googleCalendarEvents: Array.isArray(data) ? data : [],
+              googleCalendarEventsUpdatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
         }
         else setConnected(false);
-
+        
         const uploadRes = await fetch(`${backendBaseUrl}/api/calendar/events`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         const uploadData = await uploadRes.json();
-        setUploadedEvents(uploadData);
-
+        setUploadedEvents(uploadRes.ok && Array.isArray(uploadData) ? uploadData : []);
       } catch (err) {
         console.error("checkConnection error:", err);
       } finally {
@@ -151,17 +172,16 @@ export default function CalendarSettings() {
 
       });
 
-      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Upload failed");
 
       alert("File upload successful");
-
-      const data = await res.json();
       setUploadedEvents(prev => [...prev, ...data]);
 
       setFile(null);
     } catch(err) {
       console.error(err);
-      alert("Upload failed");
+      alert(err.message || "Upload failed");
     } finally {
       setUploading(false);
     }
@@ -194,6 +214,32 @@ export default function CalendarSettings() {
     } catch(err){
       console.error(err);
       alert("Failed to delete event");
+    }
+  }
+
+  async function saveLookaheadDays() {
+    try {
+      setSavingLookahead(true);
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("Not logged in");
+
+      const safeDays = Math.min(
+        Math.max(Math.floor(Number(lookaheadDays) || DEFAULT_LOOKAHEAD_DAYS), 1),
+        MAX_LOOKAHEAD_DAYS
+      );
+
+      await setDoc(
+        doc(db, "users", currentUser.uid),
+        { calendarLookaheadDays: safeDays },
+        { merge: true }
+      );
+
+      setLookaheadDays(safeDays);
+    } catch (err) {
+      console.error("Failed to save calendar range:", err);
+      alert("Failed to save calendar range");
+    } finally {
+      setSavingLookahead(false);
     }
   }
 
@@ -304,6 +350,26 @@ export default function CalendarSettings() {
             })}
           </div>
         )}
+      </div>
+
+      <div className="settings-card">
+        <h2>Mirror Calendar Range</h2>
+        <p style={{ marginBottom: 10 }}>
+          How many days ahead should be shown in the mirror calendar.
+        </p>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", maxWidth: 320 }}>
+          <input
+            className="settings-input"
+            type="number"
+            min={1}
+            max={MAX_LOOKAHEAD_DAYS}
+            value={lookaheadDays}
+            onChange={(e) => setLookaheadDays(e.target.value)}
+          />
+          <button className="btn-primary" onClick={saveLookaheadDays} disabled={savingLookahead}>
+            {savingLookahead ? "Saving..." : "Save"}
+          </button>
+        </div>
       </div>
 
       {/* Stuff for the file upload */}

@@ -88,20 +88,22 @@ router.get("/google/calendar", async (req, res) => {
       singleEvents: true,
       orderBy: "startTime",
     });
+    const items = response.data.items || [];
 
     const freshCredentials = oauth2Client.credentials || {};
     const hasTokenUpdates =
       Object.keys(freshCredentials).length > 0 &&
       JSON.stringify(freshCredentials) !== JSON.stringify(tokens);
 
-    if (hasTokenUpdates) {
-      await db.collection("users").doc(uid).set(
-        { googleTokens: { ...tokens, ...freshCredentials } },
-        { merge: true }
-      );
-    }
+    const mergePayload = {
+      googleCalendarEvents: items,
+      googleCalendarEventsUpdatedAt: new Date().toISOString(),
+    };
 
-    res.json(response.data.items || []);
+    if (hasTokenUpdates) mergePayload.googleTokens = { ...tokens, ...freshCredentials };
+    await db.collection("users").doc(uid).set(mergePayload, { merge: true });
+
+    res.json(items);
   } catch (err) {
     const errorData = err?.response?.data;
     const isInvalidGrant =
