@@ -18,6 +18,7 @@ export default function CalendarSettings() {
   const [dragActive, setDragActive] = useState(false);
   const [lookaheadDays, setLookaheadDays] = useState(DEFAULT_LOOKAHEAD_DAYS);
   const [savingLookahead, setSavingLookahead] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -84,6 +85,42 @@ export default function CalendarSettings() {
 
     const token = await currentUser.getIdToken();
     window.location.href = `${backendBaseUrl}/api/auth/google?token=${encodeURIComponent(token)}`;
+  };
+
+  const disconnectGoogle = async () => {
+    try {
+      setDisconnecting(true);
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("Not logged in");
+      const token = await currentUser.getIdToken();
+
+      const res = await fetch(`${backendBaseUrl}/api/auth/google/disconnect`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "Failed to disconnect Google Calendar");
+
+      setConnected(false);
+      setEvents([]);
+      await setDoc(
+        doc(db, "users", currentUser.uid),
+        {
+          googleCalendarEvents: [],
+          googleCalendarEventsUpdatedAt: null,
+        },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to disconnect Google Calendar");
+    } finally {
+      setDisconnecting(false);
+    }
   };
 
   function handleFileChange(e){
@@ -312,6 +349,15 @@ export default function CalendarSettings() {
         {!connected && (
           <button onClick={connectGoogle} className="btn-primary">
             Connect Google Calendar
+          </button>
+        )}
+        {connected && (
+          <button
+            onClick={disconnectGoogle}
+            className="btn-danger"
+            disabled={disconnecting}
+          >
+            {disconnecting ? "Disconnecting..." : "Disconnect Google Calendar"}
           </button>
         )}
 

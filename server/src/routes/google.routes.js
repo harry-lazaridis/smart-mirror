@@ -64,6 +64,44 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
+router.post("/google/disconnect", async (req, res) => {
+  try {
+    const decoded = await verifyToken(req);
+    const uid = decoded.uid;
+
+    const userRef = db.collection("users").doc(uid);
+    const userDoc = await userRef.get();
+    const tokens = userDoc.data()?.googleTokens;
+
+    if (tokens?.access_token || tokens?.refresh_token) {
+      try {
+        const oauth2Client = createOAuth2Client();
+        oauth2Client.setCredentials(tokens);
+        if (tokens.access_token) await oauth2Client.revokeToken(tokens.access_token);
+        else if (tokens.refresh_token) await oauth2Client.revokeToken(tokens.refresh_token);
+      } catch (revokeErr) {
+        console.error("GOOGLE REVOKE WARNING:", revokeErr?.message || revokeErr);
+      }
+    }
+
+    await userRef.set(
+      {
+        googleTokens: null,
+        connectedToCalendar: false,
+        googleReconnectRequired: false,
+        googleCalendarEvents: [],
+        googleCalendarEventsUpdatedAt: null,
+      },
+      { merge: true }
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("GOOGLE DISCONNECT ERROR:", err?.message || err);
+    res.status(500).json({ error: "Failed to disconnect Google Calendar" });
+  }
+});
+
 router.get("/google/calendar", async (req, res) => {
   try {
     const decoded = await verifyToken(req);
