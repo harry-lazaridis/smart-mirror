@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { FiCheckCircle, FiCircle } from "react-icons/fi";
 
 export default function TodoWidget() {
   const [todos, setTodos] = useState([]);
@@ -61,7 +62,7 @@ export default function TodoWidget() {
       <div style={styles.list}>
         {sortedTodos.map((todo) => (
           <div key={todo.id} style={styles.row}>
-            <span style={styles.bullet}>{todo.done ? "✓" : "○"}</span>
+            <span style={styles.bullet}>{todo.done ? <FiCheckCircle size={14} /> : <FiCircle size={14} />}</span>
             <span
               style={{
                 ...styles.text,

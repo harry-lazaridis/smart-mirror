@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { FiMapPin } from "react-icons/fi";
+import { FaSubway, FaTram, FaBus, FaShip, FaTrain } from "react-icons/fa";
 
 //How often we make a real API request to SL
 const REFRESH_INTERVAL = 60000;
@@ -20,11 +22,11 @@ const DEFAULT_SETTINGS = {
 };
 
 const TRANSPORT_ICONS = {
-  METRO: "🚇",
-  TRAM: "🚋",
-  BUS: "🚌",
-  SHIP: "⛴️",
-  TRAIN: "🚆",
+  METRO: FaSubway,
+  TRAM: FaTram,
+  BUS: FaBus,
+  SHIP: FaShip,
+  TRAIN: FaTrain,
 };
 
 // Makes old and new saved stop formats work together.
@@ -297,7 +299,12 @@ export default function SLWidget() {
                 {departures.map((dep, index) => (
                   <tr key={`${dep.line?.designation}-${dep.destination}-${dep.scheduled}-${index}`}>
                     {/* Transport icon, for example metro/bus/train */}
-                    <td className="sl-icon">{TRANSPORT_ICONS[dep.line?.transport_mode] ?? "•"}</td>
+                    <td className="sl-icon">
+                      {(() => {
+                        const Icon = TRANSPORT_ICONS[dep.line?.transport_mode];
+                        return Icon ? <Icon size={12} /> : <FiMapPin size={12} />;
+                      })()}
+                    </td>
 
                     {/* Line number, for example 14, 4, or  pendeltåg line */}
                     <td className="sl-line">{dep.line?.designation}</td>

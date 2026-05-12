@@ -9,6 +9,7 @@ import CalendarSettings from "../components/admin/CalendarSettings";
 import SLSettings from "../components/admin/SLSettings";
 import NewsSettings from "../components/admin/NewsSettings";
 import TodoSettings from "../components/admin/TodoSettings";
+import QuoteSettings from "../components/admin/QuoteSettings";
 import WidgetManager from "../components/admin/WidgetManager";
 import UserManager from "../components/admin/UserManager";
 import WidgetLayout from "../components/admin/WidgetLayout";
@@ -89,6 +90,7 @@ export default function Admin() {
           {activeTab === "sl"       && <SLSettings user={user} />}
           {activeTab === "news"     && <NewsSettings user={user} />}
           {activeTab === "todo"     && <TodoSettings user={user} />}
+          {activeTab === "quotes"   && <QuoteSettings user={user} />}
           {activeTab === "widgets"  && <WidgetManager user={user} />}
           {activeTab === "layout" && <WidgetLayout user={user} />}
           {activeTab === "user"     && <UserManager user={user} />}

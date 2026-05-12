@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { db } from "../../firebase";
 import { doc, onSnapshot } from "firebase/firestore";
+import { FiGrid, FiCalendar, FiMap, FiCheckSquare, FiMonitor, FiUser } from "react-icons/fi";
 
 export default function DashboardOverview({ user }) {
   const [userData, setUserData] = useState(null);
@@ -29,7 +30,7 @@ export default function DashboardOverview({ user }) {
 
     return {
       activeWidgets: placed.length,
-      totalWidgets: 6,
+      totalWidgets: 7,
       calendarConnected: Boolean(userData?.connectedToCalendar),
       slStops: slStops.length,
       todosTotal: todos.length,
@@ -50,7 +51,7 @@ export default function DashboardOverview({ user }) {
         <div className="stat-card">
           <div className="card-top">
             <span className="card-title">Active widgets</span>
-            <span className="card-corner-icon">🧩</span>
+            <span className="card-corner-icon"><FiGrid size={16} /></span>
           </div>
           <div className="card-body">
             <div className="stat-value-row">
@@ -63,7 +64,7 @@ export default function DashboardOverview({ user }) {
         <div className="stat-card">
           <div className="card-top">
             <span className="card-title">Google Calendar</span>
-            <span className="card-corner-icon">📅</span>
+            <span className="card-corner-icon"><FiCalendar size={16} /></span>
           </div>
           <div className="card-body">
             <div className="stat-value-row">
@@ -75,7 +76,7 @@ export default function DashboardOverview({ user }) {
         <div className="stat-card">
           <div className="card-top">
             <span className="card-title">SL stops</span>
-            <span className="card-corner-icon">🚇</span>
+            <span className="card-corner-icon"><FiMap size={16} /></span>
           </div>
           <div className="card-body">
             <div className="stat-value-row">
@@ -90,7 +91,7 @@ export default function DashboardOverview({ user }) {
         <div className="stat-card">
           <div className="card-top">
             <span className="card-title">Todos</span>
-            <span className="card-corner-icon">✅</span>
+            <span className="card-corner-icon"><FiCheckSquare size={16} /></span>
           </div>
           <div className="card-body">
             <div className="stat-value-row">
@@ -106,7 +107,7 @@ export default function DashboardOverview({ user }) {
         <div className="stat-card">
           <div className="card-top">
             <span className="card-title">Mirror resolution</span>
-            <span className="card-corner-icon">🖥️</span>
+            <span className="card-corner-icon"><FiMonitor size={16} /></span>
           </div>
           <div className="card-body">
             <div className="stat-value-row">
@@ -121,7 +122,7 @@ export default function DashboardOverview({ user }) {
         <div className="stat-card">
           <div className="card-top">
             <span className="card-title">Account</span>
-            <span className="card-corner-icon">👤</span>
+            <span className="card-corner-icon"><FiUser size={16} /></span>
           </div>
           <div className="card-body">
             <p className="stat-subtitle" style={{ marginTop: 0 }}>

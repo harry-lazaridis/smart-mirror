@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../../firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import { FiClock, FiCalendar, FiMap, FiCheckSquare, FiCloud, FiFileText, FiMessageSquare, FiCheck, FiX } from "react-icons/fi";
 
 const WIDGETS = [
-  { id: "clock",    name: "Clock",         icon: "🕐", description: "Shows current time" },
-  { id: "calendar", name: "Calendar",      icon: "📅", description: "Upcoming calendar events" },
-  { id: "sl",       name: "SL Departures", icon: "🚇", description: "Next departures from your selected stop" },
-  { id: "todo",     name: "Todo",          icon: "✅", description: "Your to-do list on the mirror" },
-  { id: "weather",  name: "Weather",       icon: "🌤", description: "Current weather" },
-  { id: "news",     name: "News",          icon: "📰", description: "Latest headlines" },
+  { id: "clock",    name: "Clock",         icon: FiClock, description: "Shows current time" },
+  { id: "calendar", name: "Calendar",      icon: FiCalendar, description: "Upcoming calendar events" },
+  { id: "sl",       name: "SL Departures", icon: FiMap, description: "Next departures from your selected stop" },
+  { id: "todo",     name: "Todo",          icon: FiCheckSquare, description: "Your to-do list on the mirror" },
+  { id: "weather",  name: "Weather",       icon: FiCloud, description: "Current weather" },
+  { id: "news",     name: "News",          icon: FiFileText, description: "Latest headlines" },
+  { id: "quotes",   name: "Qoutes",        icon: FiMessageSquare, description: "Daily Qoutes"},
 ];
 
 const DEFAULT_POSITIONS = {
@@ -18,6 +20,7 @@ const DEFAULT_POSITIONS = {
   todo:     { x: 140, y: 230, w: 250, h: 250 },
   weather:  { x: 140, y: 10,  w: 250, h: 250 },
   news:     { x: 140, y: 100, w: 250, h: 250 },
+  quotes:   { x: 10,  y: 230, w: 250, h: 250 },
 };
 
 export default function WidgetManager() {
@@ -128,7 +131,7 @@ export default function WidgetManager() {
                     fontSize: 18, flexShrink: 0,
                     transition: "all 0.2s",
                   }}>
-                    {widget.icon}
+                    <widget.icon size={18} />
                   </div>
                   <div>
                     <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: "#111827" }}>
@@ -183,12 +186,12 @@ export default function WidgetManager() {
                   border: "1px solid #bfdbfe", borderRadius: 999,
                   fontSize: 13, color: "#1d4ed8",
                 }}>
-                  <span>{w?.icon}</span>
+                  {w?.icon ? <w.icon size={14} /> : null}
                   <span style={{ fontWeight: 500 }}>{w?.name}</span>
                   <button
                     onClick={() => toggle(p.id)}
                     style={{ background: "none", border: "none", cursor: "pointer", color: "#93c5fd", fontSize: 14, padding: "0 0 0 2px", lineHeight: 1 }}
-                  >✕</button>
+                  ><FiX size={14} /></button>
                 </div>
               );
             })}
@@ -198,7 +201,7 @@ export default function WidgetManager() {
 
       {/* Save */}
       <button onClick={save} disabled={loading} className="btn-primary" style={{ width: "100%", padding: 14, fontSize: 15 }}>
-        {loading ? "Saving..." : saved ? "✓ Layout saved!" : "Save layout"}
+        {loading ? "Saving..." : saved ? <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><FiCheck size={14} /> Layout saved!</span> : "Save layout"}
       </button>
 
       <p style={{ marginTop: 12, fontSize: 12, color: "#9ca3af", textAlign: "center" }}>

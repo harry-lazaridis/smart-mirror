@@ -711,3 +711,51 @@ button {
 .sl-time {
   white-space: nowrap;
 }
+
+/* Quotes layout */
+
+.quotes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.quotes-card,
+.activity-panel,
+.content-panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+}
+
+.quotes-card {
+  min-height: 50px;
+  padding: 20px 28px;
+  display: flex;
+}
+
+.quotes-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.quotes-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #111827;
+
+}
+
+@media (max-width: 600px) {
+  .quotes-grid {
+    grid-template-columns: auto;
+
+  }
+
+  .quotes-card {
+    width: 100%;
+  }
+}

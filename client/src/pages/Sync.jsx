@@ -3,6 +3,7 @@ import { db } from "../firebase";
 import { useNavigate } from "react-router-dom"
 import {QRCodeSVG} from 'qrcode.react';
 import { onSnapshot, serverTimestamp, doc, setDoc } from "firebase/firestore";
+import { FiCheckCircle } from "react-icons/fi";
 
 const getOrCreateDeviceId = () => {
     let id = localStorage.getItem("deviceId");
@@ -43,7 +44,7 @@ export default function Sync() {
   if (status === "synced") {
     return (
       <div style={styles.page}>
-        <div style={styles.checkmark}>✓</div>
+        <div style={styles.checkmark}><FiCheckCircle size={64} /></div>
         <h2 style={styles.title}>Konto kopplat!</h2>
         <p style={styles.subtitle}>Startar spegeln...</p>
       </div>
@@ -82,5 +83,5 @@ const styles = {
   },
   hint: { fontSize: 13, color: "#475569", margin: 0 },
   deviceId: { fontSize: 11, color: "#1e293b", margin: 0 },
-  checkmark: { fontSize: 64, color: "#4ade80" },
+  checkmark: { color: "#4ade80", display: "inline-flex" },
 };

@@ -1,17 +1,31 @@
 import { useEffect, useState } from "react";
 import { auth } from "../../firebase";
 import { signOut } from "firebase/auth";
+import {
+  FiBarChart2,
+  FiUser,
+  FiCalendar,
+  FiMap,
+  FiFileText,
+  FiCheckSquare,
+  FiMessageSquare,
+  FiGrid,
+  FiMonitor,
+  FiSettings,
+  FiLogOut,
+} from "react-icons/fi";
 
 const NAV_ITEMS = [
-  { id: "dashboard", label: "Dashboard", icon: "📊" },
-  { id: "profile", label: "Profile", icon: "👤" },
-  { id: "calendar", label: "Calendar", icon: "📅" },
-  { id: "sl", label: "SL Transport", icon: "🚇" },
-  { id: "news", label: "News", icon: "📰" },
-  { id: "todo", label: "Todo", icon: "✅" },
-  { id: "widgets", label: "Widgets", icon: "🧩" },
-  { id: "layout", label: "Mirror Layout", icon: "🖥️" },
-  { id: "user", label: "Account", icon: "⚙️" },
+  { id: "dashboard", label: "Dashboard", icon: FiBarChart2 },
+  { id: "profile", label: "Profile", icon: FiUser },
+  { id: "calendar", label: "Calendar", icon: FiCalendar },
+  { id: "sl", label: "SL Transport", icon: FiMap },
+  { id: "news", label: "News", icon: FiFileText },
+  { id: "todo", label: "Todo", icon: FiCheckSquare },
+  { id: "quotes", label: "Quotes", icon: FiMessageSquare },
+  { id: "widgets", label: "Widgets", icon: FiGrid },
+  { id: "layout", label: "Mirror Layout", icon: FiMonitor },
+  { id: "user", label: "Account", icon: FiSettings },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab }) {
@@ -112,6 +126,9 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         {/* NAVIGATION */}
         <nav className="sidebar-nav">
           {NAV_ITEMS.map((item) => (
+            (() => {
+              const Icon = item.icon;
+              return (
             <button
               key={item.id}
               className={`nav-item ${
@@ -119,16 +136,18 @@ export default function Sidebar({ activeTab, setActiveTab }) {
               }`}
               onClick={() => handleNavigate(item.id)}
             >
-              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-icon">{typeof Icon === "string" ? Icon : <Icon size={16} />}</span>
               <span className="nav-label">{item.label}</span>
             </button>
+              );
+            })()
           ))}
         </nav>
 
         {/* BOTTOM / LOGOUT */}
         <div className="sidebar-bottom">
           <button className="logout-button" onClick={handleLogout}>
-            <span className="nav-icon">🚪</span>
+            <span className="nav-icon"><FiLogOut size={16} /></span>
             <span className="nav-label">Log out</span>
           </button>
         </div>

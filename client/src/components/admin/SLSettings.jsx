@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { auth, db } from "../../firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import { FiCheck } from "react-icons/fi";
 
 //Default settings used if the user has not saved any custom SL settings yet
 const DEFAULT_SETTINGS = {
@@ -48,7 +49,7 @@ export default function SLSettings() {
   //Used to disable the add button while saving
   const [loading, setLoading] = useState(false);
 
-  //Used to briefly show "✓ Added!" after saving a stop
+  //Used to briefly show a success state after saving a stop
   const [saved, setSaved] = useState(false);
 
   //Reference to the stop search area, used to detect clicks outside the dropdown
@@ -242,7 +243,7 @@ export default function SLSettings() {
 
         {/* Add button is disabled until a valid stop has been selected */}
         <button className="btn-primary" onClick={addStop} disabled={loading || !stop.siteId}>
-          {loading ? "Saving..." : saved ? "✓ Added!" : "+ Add stop"}
+          {loading ? "Saving..." : saved ? <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><FiCheck size={14} /> Added!</span> : "+ Add stop"}
         </button>
       </div>
 

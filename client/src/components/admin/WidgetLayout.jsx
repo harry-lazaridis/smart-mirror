@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { auth, db } from "../../firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import { FiClock, FiCalendar, FiMap, FiCheckSquare, FiCloud, FiFileText, FiMessageSquare, FiCheck, FiX } from "react-icons/fi";
 
 const WIDGETS = [
-  { id: "clock",    name: "Clock",         icon: "🕐" },
-  { id: "calendar", name: "Calendar",      icon: "📅" },
-  { id: "sl",       name: "SL Departures", icon: "🚇" },
-  { id: "todo",     name: "Todo",          icon: "✅" },
-  { id: "weather",  name: "Weather",       icon: "🌤" },
-  { id: "news",     name: "News",          icon: "📰" },
+  { id: "clock",    name: "Clock",         icon: FiClock },
+  { id: "calendar", name: "Calendar",      icon: FiCalendar },
+  { id: "sl",       name: "SL Departures", icon: FiMap },
+  { id: "todo",     name: "Todo",          icon: FiCheckSquare },
+  { id: "weather",  name: "Weather",       icon: FiCloud },
+  { id: "news",     name: "News",          icon: FiFileText },
+  { id: "quotes",   name: "Quotes",        icon: FiMessageSquare },
 ];
 
 const MIN_SIZE = { w: 60, h: 40 };
@@ -160,7 +162,7 @@ export default function WidgetLayout() {
 
   const selectedWidget = placed.find(p => p.id === selected);
   const widgetName = (id) => WIDGETS.find(w => w.id === id)?.name ?? id;
-  const widgetIcon = (id) => WIDGETS.find(w => w.id === id)?.icon ?? "□";
+  const widgetIcon = (id) => WIDGETS.find(w => w.id === id)?.icon ?? null;
   const placedIds = new Set(placed.map(p => p.id));
 
   return (
@@ -207,7 +209,7 @@ export default function WidgetLayout() {
                   userSelect: "none",
                 }}
               >
-                <span>{w.icon}</span>
+                <span>{w.icon ? <w.icon size={15} /> : null}</span>
                 <span style={{ fontWeight: 500 }}>{w.name}</span>
                 {!active ? (
                   <button onClick={() => addToCanvas(w.id)}
@@ -217,7 +219,7 @@ export default function WidgetLayout() {
                 ) : (
                   <button onClick={() => removeWidget(w.id)}
                     style={{ background: "none", border: "none", cursor: "pointer", color: "#93c5fd", fontSize: 13, padding: "0 0 0 2px", lineHeight: 1 }}>
-                    ✕
+                    <FiX size={14} />
                   </button>
                 )}
               </div>
@@ -281,7 +283,12 @@ export default function WidgetLayout() {
                     touchAction: "none",
                   }}
                 >
-                  <span style={{ fontSize: 14, pointerEvents: "none" }}>{widgetIcon(p.id)}</span>
+                  <span style={{ fontSize: 14, pointerEvents: "none", display: "inline-flex" }}>
+                    {widgetIcon(p.id) ? (() => {
+                      const Icon = widgetIcon(p.id);
+                      return <Icon size={14} />;
+                    })() : null}
+                  </span>
                   <span style={{ fontSize: 9, color: isSelected ? "#93c5fd" : "#475569", pointerEvents: "none", marginTop: 2 }}>
                     {widgetName(p.id)}
                   </span>
@@ -316,7 +323,10 @@ export default function WidgetLayout() {
         {selectedWidget && (
           <div className="settings-card" style={{ width: 180, flexShrink: 0 }}>
             <h2 style={{ fontSize: 15 }}>
-              {widgetIcon(selectedWidget.id)} {widgetName(selectedWidget.id)}
+              {(() => {
+                const Icon = widgetIcon(selectedWidget.id);
+                return Icon ? <Icon size={14} style={{ verticalAlign: "text-bottom", marginRight: 6 }} /> : null;
+              })()} {widgetName(selectedWidget.id)}
             </h2>
 
             {[
@@ -345,7 +355,7 @@ export default function WidgetLayout() {
       {/* Save */}
       <button onClick={save} disabled={loading} className="btn-primary"
         style={{ width: "100%", padding: 14, fontSize: 15, marginTop: 20 }}>
-        {loading ? "Saving..." : saved ? "✓ Layout saved!" : "Save layout"}
+        {loading ? "Saving..." : saved ? <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><FiCheck size={14} /> Layout saved!</span> : "Save layout"}
       </button>
     </div>
   );

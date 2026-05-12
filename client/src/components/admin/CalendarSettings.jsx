@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { FiCheckCircle, FiXCircle } from "react-icons/fi";
 
 const DEFAULT_LOOKAHEAD_DAYS = 3;
 const MAX_LOOKAHEAD_DAYS = 30;
@@ -301,7 +302,10 @@ export default function CalendarSettings() {
         <p style={{ marginBottom: 16 }}>
           Status:{" "}
           <span style={{ color: connected ? "#16a34a" : "#dc2626", fontWeight: 600 }}>
-            {connected ? "● Connected" : "● Not connected"}
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              {connected ? <FiCheckCircle size={14} /> : <FiXCircle size={14} />}
+              {connected ? "Connected" : "Not connected"}
+            </span>
           </span>
         </p>
 

@@ -9,6 +9,7 @@ import CalendarWidget from "../components/Mirror/CalendarWidget";
 import ClockWidget from "../components/Mirror/ClockWidget";
 import NewsWidget from "../components/Mirror/NewsWidget";
 import TodoWidget from "../components/Mirror/TodoWidget";
+import QuotesWidget from "../components/Mirror/QuotesWidget";
 import { onAuthStateChanged } from "firebase/auth";
 
 //Radera när vi deploy.
@@ -112,6 +113,8 @@ function renderWidget(id, uid) {
       return <SLWidget />;
     case "todo":
       return <TodoWidget />;
+    case "quotes":
+      return <QuotesWidget />;
     default:
       return <div>Unknown</div>;
   }

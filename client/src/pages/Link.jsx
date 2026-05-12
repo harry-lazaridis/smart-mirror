@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "firebase/auth";
+import { FiCheckCircle } from "react-icons/fi";
 
 export default function Link() {
   const [searchParams]      = useSearchParams();
@@ -75,7 +76,7 @@ export default function Link() {
 
       {status === "success" && (
         <>
-          <div style={{ fontSize: 56, color: "#4ade80" }}>✓</div>
+          <div style={{ display: "inline-flex", color: "#4ade80" }}><FiCheckCircle size={56} /></div>
           <h2 style={{ margin: 0 }}>Done!</h2>
           <p style={styles.subtitle}>The mirror will start automatically.</p>
           <p style={styles.subtitle}>You can close this page.</p>
