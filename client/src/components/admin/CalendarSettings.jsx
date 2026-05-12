@@ -5,16 +5,12 @@ export default function CalendarSettings() {
   const backendBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
   const [connected, setConnected] = useState(false);
   const [events, setEvents] = useState([]);
-<<<<<<< HEAD
   const [uploadedEvents, setUploadedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-=======
-  const [loading, setLoading] = useState(true);
->>>>>>> San-BranchSprint3
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -30,15 +26,11 @@ export default function CalendarSettings() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-<<<<<<< HEAD
 
         if(res.ok) { 
           setConnected(true); 
           setEvents(data); 
         }
-=======
-        if (res.ok) { setConnected(true); setEvents(data); }
->>>>>>> San-BranchSprint3
         else setConnected(false);
 
         const uploadRes = await fetch(`${backendBaseUrl}/api/calendar/events`, {
@@ -71,7 +63,6 @@ export default function CalendarSettings() {
     const token = await currentUser.getIdToken();
     window.location.href = `${backendBaseUrl}/api/auth/google?token=${encodeURIComponent(token)}`;
   };
-<<<<<<< HEAD
 
   function handleFileChange(e){
     const selected = e.target.files[0];
@@ -188,8 +179,6 @@ export default function CalendarSettings() {
     if(start.dateTime) return start.dateTime;
     if(start.date) return start.date;
   }
-=======
->>>>>>> San-BranchSprint3
 
   if (loading) return <div className="settings-card"><p>Loading...</p></div>;
 
