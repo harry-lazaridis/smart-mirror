@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react";
 
-import { api } from "../../api/client"
-import { auth } from "../../firebase";
+import { api } from "../../api/client";
+import { auth, db } from "../../firebase";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 
+const DEFAULT_LOOKAHEAD_DAYS = 3;
+const MAX_LOOKAHEAD_DAYS = 30;
 
-export default function CalendarWidget() {
-    
-  const [events, setEvents] = useState([]);
+export default function CalendarWidget({ uid }) {
+  const [googleEvents, setGoogleEvents] = useState([]);
+  const [uploadedEvents, setUploadedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [needsReconnect, setNeedsReconnect] = useState(false);
+  const [lookaheadDays, setLookaheadDays] = useState(DEFAULT_LOOKAHEAD_DAYS);
 
   const formatEventDate = (event) => {
     const rawDate = event.start?.dateTime ?? event.start?.date;
@@ -38,25 +42,65 @@ export default function CalendarWidget() {
   };
 
   useEffect(() => {
+    let unsubUserDoc = null;
+
+    const userId = uid || auth.currentUser?.uid;
+    if (userId) {
+      unsubUserDoc = onSnapshot(doc(db, "users", userId), (snap) => {
+        const data = snap.data() || {};
+        const raw = Number(data.calendarLookaheadDays);
+        setLookaheadDays(
+          Number.isFinite(raw)
+            ? Math.min(Math.max(Math.floor(raw), 1), MAX_LOOKAHEAD_DAYS)
+            : DEFAULT_LOOKAHEAD_DAYS
+        );
+        if (Array.isArray(data.events)) setUploadedEvents(data.events);
+        if (Array.isArray(data.googleCalendarEvents)) setGoogleEvents(data.googleCalendarEvents);
+        setLoading(false);
+      });
+    }
+
     const checkConnection = async () => {
       try {
         const currentUser = auth.currentUser;
         if (!currentUser) {
-          setEvents([]);
+          setNeedsReconnect(false);
+          setLoading(false);
           return;
         }
 
         const token = await currentUser.getIdToken();
-        const res = await api.get("/api/auth/google/calendar", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const [googleRes, uploadedRes] = await Promise.allSettled([
+          api.get("/api/auth/google/calendar", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          api.get("/api/calendar/events", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-        setEvents(Array.isArray(res.data) ? res.data : []);
-        setNeedsReconnect(false);
+        const userSnap = await fetchLookaheadDays(currentUser.uid);
+        setLookaheadDays(userSnap);
+
+        if (googleRes.status === "fulfilled") {
+          setGoogleEvents(Array.isArray(googleRes.value.data) ? googleRes.value.data : []);
+          setNeedsReconnect(false);
+        } else {
+          const reconnectCode = googleRes.reason?.response?.data?.code;
+          setNeedsReconnect(reconnectCode === "GOOGLE_RECONNECT_REQUIRED");
+          setGoogleEvents([]);
+        }
+
+        if (uploadedRes.status === "fulfilled") {
+          setUploadedEvents(Array.isArray(uploadedRes.value.data) ? uploadedRes.value.data : []);
+        } else {
+          setUploadedEvents([]);
+        }
       } catch (err) {
         const reconnectCode = err?.response?.data?.code;
         setNeedsReconnect(reconnectCode === "GOOGLE_RECONNECT_REQUIRED");
-        setEvents([]);
+        setGoogleEvents([]);
+        setUploadedEvents([]);
       } finally {
         setLoading(false);
       }
@@ -64,6 +108,7 @@ export default function CalendarWidget() {
 
     checkConnection();
 
+<<<<<<< HEAD
     const interval = setInterval(() => {
       checkConnection();
     }, 15 * 60 * 1000); // every 15 minutes calender update
@@ -76,6 +121,42 @@ export default function CalendarWidget() {
 
     return () => clearInterval(interval);
   }, []);
+=======
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("calendar") === "connected") {
+      checkConnection();
+      window.history.replaceState({}, "", "/admin"); //Fråga inte varför
+    }
+
+    return () => {
+      if (unsubUserDoc) unsubUserDoc();
+    };
+  }, [uid]);
+
+  const filteredEvents = useMemo(() => {
+    const merged = [...googleEvents, ...uploadedEvents].map((event, index) => ({
+      ...event,
+      _safeId: event?.id ? String(event.id) : `evt-${index}`,
+      _date: getEventDate(event),
+    }));
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const end = new Date(now);
+    end.setDate(end.getDate() + lookaheadDays);
+
+    const datedEvents = merged
+      .filter((event) => event._date && !Number.isNaN(event._date.getTime()))
+      .filter((event) => {
+        const lowerBound = isAllDayEvent(event) ? startOfToday : now;
+        return event._date >= lowerBound && event._date <= end;
+      })
+      .sort((a, b) => a._date - b._date);
+
+    const undatedEvents = merged.filter((event) => !event._date || Number.isNaN(event._date.getTime()));
+    return [...datedEvents, ...undatedEvents];
+  }, [googleEvents, uploadedEvents, lookaheadDays]);
+>>>>>>> Alex-Sprint4
 
   const reconnectGoogle = async () => {
     const currentUser = auth.currentUser;
@@ -96,6 +177,7 @@ export default function CalendarWidget() {
     );
   }
 
+<<<<<<< HEAD
   //https://developers.google.com/workspace/calendar/api/v3/reference/events#resource
   
   return (
@@ -114,6 +196,65 @@ export default function CalendarWidget() {
           ))}
         </div> 
   )
+=======
+  return (
+        <div style={styles.card}>
+          <h3 style={styles.heading}>Upcoming events ({lookaheadDays} days)</h3>
+          {filteredEvents.length === 0 && <p>No events in this period</p>}
+          {filteredEvents.map((event) => (
+            <div key={event._safeId} style={styles.event}>
+              <strong>{getEventTitle(event)}</strong>
+              <p>{formatEventTime(event)}</p>
+            </div>
+          ))}
+        </div> 
+  );
+}
+
+async function fetchLookaheadDays(uid) {
+  const snap = await getDoc(doc(db, "users", uid));
+  const raw = Number(snap.data()?.calendarLookaheadDays);
+  if (!Number.isFinite(raw)) return DEFAULT_LOOKAHEAD_DAYS;
+  return Math.min(Math.max(Math.floor(raw), 1), MAX_LOOKAHEAD_DAYS);
+}
+
+function getEventDate(event) {
+  const start = event?.start ?? event?.startDate ?? event?.date ?? event?.when ?? event?.datetime ?? event?.["Start Date"] ?? event?.["Start"] ?? event?.["Date"];
+  if (typeof start?.toDate === "function") return start.toDate();
+  if (start?.dateTime) return new Date(start.dateTime);
+  if (start?.date) return new Date(start.date);
+  if (typeof start?.seconds === "number") return new Date(start.seconds * 1000);
+  if (start?._seconds) return new Date(start._seconds * 1000);
+  if (typeof start === "string") return new Date(start);
+  if (start instanceof Date) return start;
+  return null;
+}
+
+function formatEventTime(event) {
+  const start = event?.start ?? event?.startDate ?? event?.date ?? event?.when ?? event?.datetime ?? event?.["Start Date"] ?? event?.["Start"] ?? event?.["Date"];
+  if (typeof start?.toDate === "function") return start.toDate().toLocaleString();
+  if (start?.dateTime) return new Date(start.dateTime).toLocaleString();
+  if (start?.date) return new Date(start.date).toLocaleDateString();
+  if (typeof start?.seconds === "number") return new Date(start.seconds * 1000).toLocaleString();
+  if (start?._seconds) return new Date(start._seconds * 1000).toLocaleString();
+  if (typeof start === "string") return new Date(start).toLocaleString();
+  if (start instanceof Date) return start.toLocaleString();
+  return "";
+}
+
+function getEventTitle(event) {
+  return (
+    event?.summary ||
+    event?.title ||
+    event?.name ||
+    event?.description ||
+    "Untitled event"
+  );
+}
+
+function isAllDayEvent(event) {
+  return Boolean(event?.start?.date) && !event?.start?.dateTime;
+>>>>>>> Alex-Sprint4
 }
 
 const styles = {

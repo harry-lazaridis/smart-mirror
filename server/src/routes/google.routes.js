@@ -87,6 +87,7 @@ router.get("/google/calendar", async (req, res) => {
     // add a day
     date.setDate(date.getDate() + 1);
 
+<<<<<<< HEAD
     const response = await calendar.events.list({
       calendarId: "primary",
       timeMin: new Date().toISOString(),
@@ -100,6 +101,62 @@ router.get("/google/calendar", async (req, res) => {
     const hasTokenUpdates =
       Object.keys(freshCredentials).length > 0 &&
       JSON.stringify(freshCredentials) !== JSON.stringify(tokens);
+=======
+    const response = await calendar.events.list({
+      calendarId: "primary",
+      timeMin: new Date().toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: "startTime",
+    });
+    const items = response.data.items || [];
+
+    const freshCredentials = oauth2Client.credentials || {};
+    const hasTokenUpdates =
+      Object.keys(freshCredentials).length > 0 &&
+      JSON.stringify(freshCredentials) !== JSON.stringify(tokens);
+
+    const mergePayload = {
+      googleCalendarEvents: items,
+      googleCalendarEventsUpdatedAt: new Date().toISOString(),
+    };
+
+    if (hasTokenUpdates) mergePayload.googleTokens = { ...tokens, ...freshCredentials };
+    await db.collection("users").doc(uid).set(mergePayload, { merge: true });
+
+    res.json(items);
+  } catch (err) {
+    const errorData = err?.response?.data;
+    const isInvalidGrant =
+      err?.message === "invalid_grant" ||
+      errorData?.error === "invalid_grant";
+
+    if (isInvalidGrant) {
+      try {
+        const decoded = await verifyToken(req);
+        await db.collection("users").doc(decoded.uid).set(
+          {
+            googleTokens: null,
+            connectedToCalendar: false,
+            googleReconnectRequired: true,
+          },
+          { merge: true }
+        );
+      } catch (cleanupError) {
+        console.error("CALENDAR TOKEN CLEANUP ERROR:", cleanupError?.message || cleanupError);
+      }
+
+      return res.status(401).json({
+        error: "Google token expired or revoked. Please reconnect your Google Calendar.",
+        code: "GOOGLE_RECONNECT_REQUIRED",
+      });
+    }
+
+    console.error("CALENDAR ERROR:", err?.message || err);
+    res.status(500).json({ error: "Failed to load calendar events" });
+  }
+});
+>>>>>>> Alex-Sprint4
 
     if (hasTokenUpdates) {
       await db.collection("users").doc(uid).set(

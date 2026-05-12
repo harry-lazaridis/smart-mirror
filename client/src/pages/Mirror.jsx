@@ -88,7 +88,7 @@ export default function Mirror() {
                 height: `${p.h * scaleY}%`,
               }}
             >
-              <div style={styles.widgetInner}>{renderWidget(p.id)}</div>
+              <div style={styles.widgetInner}>{renderWidget(p.id, uid)}</div>
             </div>
           );
         })}
@@ -98,7 +98,7 @@ export default function Mirror() {
 }
 
 
-function renderWidget(id) {
+function renderWidget(id, uid) {
   switch (id) {
     case "clock":
       return <ClockWidget />;
@@ -107,7 +107,7 @@ function renderWidget(id) {
     case "news":
       return <NewsWidget />;
     case "calendar":
-      return <CalendarWidget />;
+      return <CalendarWidget uid={uid} />;
     case "sl":
       return <SLWidget />;
     case "todo":
