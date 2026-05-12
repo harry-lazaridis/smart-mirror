@@ -108,20 +108,6 @@ export default function CalendarWidget({ uid }) {
 
     checkConnection();
 
-<<<<<<< HEAD
-    const interval = setInterval(() => {
-      checkConnection();
-    }, 15 * 60 * 1000); // every 15 minutes calender update
-
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("calendar") === "connected") {
-      checkConnection();
-      window.history.replaceState({}, "", "/admin");
-    }
-
-    return () => clearInterval(interval);
-  }, []);
-=======
     const params = new URLSearchParams(window.location.search);
     if (params.get("calendar") === "connected") {
       checkConnection();
@@ -156,7 +142,6 @@ export default function CalendarWidget({ uid }) {
     const undatedEvents = merged.filter((event) => !event._date || Number.isNaN(event._date.getTime()));
     return [...datedEvents, ...undatedEvents];
   }, [googleEvents, uploadedEvents, lookaheadDays]);
->>>>>>> Alex-Sprint4
 
   const reconnectGoogle = async () => {
     const currentUser = auth.currentUser;
@@ -177,26 +162,6 @@ export default function CalendarWidget({ uid }) {
     );
   }
 
-<<<<<<< HEAD
-  //https://developers.google.com/workspace/calendar/api/v3/reference/events#resource
-  
-  return (
-        <div style={styles.card}>
-          <h3 style={styles.heading}>Upcoming events</h3>
-          {events.length === 0 && <p>No events today</p>}
-          {events.map((event) => (
-            <div key={event.id} style={styles.event}>
-              <strong>{event.summary}</strong>
-
-              <div style={styles.dateTimeRow}>
-                <span style={styles.date}>{formatEventDate(event)}</span>
-                <span style={styles.time}>{formatEventTime(event)}</span>
-              </div>
-            </div>
-          ))}
-        </div> 
-  )
-=======
   return (
         <div style={styles.card}>
           <h3 style={styles.heading}>Upcoming events ({lookaheadDays} days)</h3>
@@ -254,7 +219,6 @@ function getEventTitle(event) {
 
 function isAllDayEvent(event) {
   return Boolean(event?.start?.date) && !event?.start?.dateTime;
->>>>>>> Alex-Sprint4
 }
 
 const styles = {
