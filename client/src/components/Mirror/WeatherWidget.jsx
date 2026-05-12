@@ -89,7 +89,8 @@ const styles = {
   },
   label: {
     margin: 0,
-    opacity: 0.75,
+    opacity: 1,
+    fontWeight: 500,
     fontSize: "clamp(10px, 5cqi, 18px)",
   },
   temp: {
@@ -99,7 +100,8 @@ const styles = {
   },
   meta: {
     margin: 0,
-    opacity: 0.9,
+    opacity: 1,
+    fontWeight: 500,
     fontSize: "clamp(10px, 5cqi, 18px)",
   },
   forecastRow: {
@@ -116,12 +118,13 @@ const styles = {
   },
   forecastTime: {
     margin: 0,
-    opacity: 0.7,
-    fontSize: "clamp(9px, 4cqi, 14px)",
+    opacity: 1,
+    fontWeight: 600,
+    fontSize: "clamp(11px, 5cqi, 14px)",
   },
   forecastTemp: {
     margin: 0,
     fontWeight: 600,
-    fontSize: "clamp(11px, 5cqi, 18px)",
+    fontSize: "clamp(12px, 6cqi, 18px)",
   }
 }

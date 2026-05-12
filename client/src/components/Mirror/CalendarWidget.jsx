@@ -14,33 +14,6 @@ export default function CalendarWidget({ uid }) {
   const [needsReconnect, setNeedsReconnect] = useState(false);
   const [lookaheadDays, setLookaheadDays] = useState(DEFAULT_LOOKAHEAD_DAYS);
 
-  const formatEventDate = (event) => {
-    const rawDate = event.start?.dateTime ?? event.start?.date;
-    if (!rawDate) return "";
-
-    const date = new Date(rawDate);
-
-    return date.toLocaleDateString("en-EN", {
-      weekday: "short",
-      day: "2-digit",
-      month: "2-digit",
-    });
-  };
-
-  const formatEventTime = (event) => {
-    const rawDate = event.start?.dateTime;
-
-    if (!rawDate) return "All day";
-
-    const date = new Date(rawDate);
-
-    return date.toLocaleTimeString("sv-SE", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  };
-
   useEffect(() => {
     let unsubUserDoc = null;
 
@@ -169,7 +142,11 @@ export default function CalendarWidget({ uid }) {
           {filteredEvents.map((event) => (
             <div key={event._safeId} style={styles.event}>
               <strong>{getEventTitle(event)}</strong>
-              <p>{formatEventTime(event)}</p>
+
+              <div style={styles.dateTimeRow}>
+                <span style={styles.date}>{formatEventDate(event)}</span>
+                <span style={styles.time}>{formatEventTime(event)}</span>
+              </div>
             </div>
           ))}
         </div> 
@@ -184,27 +161,45 @@ async function fetchLookaheadDays(uid) {
 }
 
 function getEventDate(event) {
+  return getEventStart(event);
+}
+
+function getEventStart(event) {
   const start = event?.start ?? event?.startDate ?? event?.date ?? event?.when ?? event?.datetime ?? event?.["Start Date"] ?? event?.["Start"] ?? event?.["Date"];
+
   if (typeof start?.toDate === "function") return start.toDate();
   if (start?.dateTime) return new Date(start.dateTime);
   if (start?.date) return new Date(start.date);
   if (typeof start?.seconds === "number") return new Date(start.seconds * 1000);
   if (start?._seconds) return new Date(start._seconds * 1000);
-  if (typeof start === "string") return new Date(start);
   if (start instanceof Date) return start;
+  if (typeof start === "string") return new Date(start);
+
   return null;
 }
 
+function formatEventDate(event) {
+  const date = getEventStart(event);
+  if (!date || Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  });
+}
+
 function formatEventTime(event) {
-  const start = event?.start ?? event?.startDate ?? event?.date ?? event?.when ?? event?.datetime ?? event?.["Start Date"] ?? event?.["Start"] ?? event?.["Date"];
-  if (typeof start?.toDate === "function") return start.toDate().toLocaleString();
-  if (start?.dateTime) return new Date(start.dateTime).toLocaleString();
-  if (start?.date) return new Date(start.date).toLocaleDateString();
-  if (typeof start?.seconds === "number") return new Date(start.seconds * 1000).toLocaleString();
-  if (start?._seconds) return new Date(start._seconds * 1000).toLocaleString();
-  if (typeof start === "string") return new Date(start).toLocaleString();
-  if (start instanceof Date) return start.toLocaleString();
-  return "";
+  if (isAllDayEvent(event)) return "All day";
+
+  const date = getEventStart(event);
+  if (!date || Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleTimeString("sv-SE", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 }
 
 function getEventTitle(event) {
@@ -255,6 +250,7 @@ const styles = {
   },
   date: {
     opacity: 1,
+    fontWeight: 700,
     fontSize: "clamp(10px, 4cqi, 16px)",
   },
   time: {

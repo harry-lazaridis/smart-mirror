@@ -276,18 +276,22 @@ export default function SLWidget() {
 
   return (
     <div ref={rootRef} className={`sl-widget sl-widget--${layoutMode}`}>
-      {/* Shows either the latest update time or an SL error message */}
-      {(settings.showLastUpdatedAlways || error) && (
-        <div className="sl-last-updated">
-          {error ? `SL error: ${error}` : `Last updated: ${lastUpdated?.toLocaleTimeString("en-US")}`}
-        </div>
-      )}
-
       {/* One card/table per selected stop */}
-      {stopCards.map(({ stop, departures }) => (
-        <section key={stop.siteId} className="sl-stop-card">
-          {/* Stop name, for example "T-Centralen" */}
-          <h3 className="sl-stop-title">{stop.name}</h3>
+        {stopCards.map(({ stop, departures }, index) => (
+          <section key={stop.siteId} className="sl-stop-card">
+
+            {/* Shows either the latest update time or an SL error message */}
+            {index === 0 && (settings.showLastUpdatedAlways || error) && (
+              <div className="sl-last-updated">
+                {error
+                  ? `SL error: ${error}`
+                  : `Last updated: ${lastUpdated?.toLocaleTimeString("en-US")}`}
+              </div>
+            )}
+
+            {/* Stop name, for example "T-Centralen" */}
+            <h3 className="sl-stop-title">{stop.name}</h3>
+                  
 
           {/* Show an empty message if no departures match the selected filters */}
           {departures.length === 0 ? (

@@ -140,8 +140,8 @@ const styles = {
   },
   widget: {
     position: "absolute",
-    background: "rgba(15, 23, 42, 0.55)",
-    border: "1px solid rgba(148, 163, 184, 0.25)",
+    background: "rgba(0, 0, 0, 0.55)",
+    border: "1px solid rgba(0, 0, 0, 0.25)",
     borderRadius: 12,
     overflow: "hidden",
     display: "flex",

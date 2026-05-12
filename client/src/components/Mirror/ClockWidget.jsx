@@ -69,7 +69,7 @@ const styles = {
   },
   label: {
     margin: 0,
-    opacity: 0.7,
+    opacity: 1,
     letterSpacing: "0.08em",
     fontSize: "clamp(10px, 6cqi, 20px)",
     textTransform: "uppercase",

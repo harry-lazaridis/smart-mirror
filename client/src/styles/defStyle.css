@@ -661,7 +661,7 @@ button {
 }
 
 .sl-last-updated {
-  grid-column: 1 / -1;
+  margin: 0 0 1cqi;
 }
 
 .sl-stop-card {
@@ -675,7 +675,7 @@ button {
   min-height: 0;
   overflow: auto;
   padding: 4cqi;
-  gap: 4cqi;
+  gap: 1.5cqi;
   font-size: clamp(10px, 3.8cqi, 16px);
 }
 
@@ -694,12 +694,14 @@ button {
 
 .sl-stop-title {
   margin: 0 0 2cqi;
-  font-size: clamp(11px, 5cqi, 20px);
+  font-size: clamp(12px, 5cqi, 20px);
 }
 
 .sl-departure-table {
   width: 100%;
   border-collapse: collapse;
+  font-weight: 500;
+  font-size: clamp(11px, 5cqi, 20px);
 }
 
 .sl-departure-table td {
