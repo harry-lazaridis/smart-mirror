@@ -32,7 +32,8 @@ router.get("/google", async (req, res) => {
 
     const url = oauth2Client.generateAuthUrl({
       access_type: "offline",
-      scope: ["https://www.googleapis.com/auth/calendar.readonly"],
+      prompt: "consent",
+      scope: ["https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/tasks.readonly"],
       state: decoded.uid,
     });
 
@@ -81,9 +82,15 @@ router.get("/google/calendar", async (req, res) => {
 
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
+    var date = new Date();
+
+    // add a day
+    date.setDate(date.getDate() + 1);
+
     const response = await calendar.events.list({
       calendarId: "primary",
       timeMin: new Date().toISOString(),
+      timeMax: date.toISOString(),
       maxResults: 10,
       singleEvents: true,
       orderBy: "startTime",
@@ -134,4 +141,90 @@ router.get("/google/calendar", async (req, res) => {
   }
 });
 
+router.get("/google/tasks", async (req, res) => {
+  try {
+    const decoded = await verifyToken(req);
+    const uid = decoded.uid;
+
+    const userDoc = await db.collection("users").doc(uid).get();
+    const tokens = userDoc.data()?.googleTokens;
+
+    if (!tokens) {
+      return res.status(400).json({ error: "Google not connected" });
+    }
+
+    oauth2Client.setCredentials(tokens);
+
+    const tasksApi = google.tasks({ version: "v1", auth: oauth2Client });
+
+    // Get all Google Task lists
+    const taskListsResponse = await tasksApi.tasklists.list({
+      maxResults: 20,
+    });
+
+    const taskLists = taskListsResponse.data.items || [];
+
+    const allTasks = [];
+
+    for (const taskList of taskLists) {
+      const tasksResponse = await tasksApi.tasks.list({
+        tasklist: taskList.id,
+        showCompleted: true,
+        showHidden: false,
+        maxResults: 100,
+      });
+
+      const tasks = tasksResponse.data.items || [];
+
+      tasks.forEach((task) => {
+        allTasks.push({
+          id: task.id,
+          googleTaskId: task.id,
+          taskListId: taskList.id,
+          taskListTitle: taskList.title,
+          text: task.title || "Untitled task",
+          notes: task.notes || "",
+          done: task.status === "completed",
+          due: task.due || null,
+          createdAt: task.updated ? new Date(task.updated).getTime() : Date.now(),
+          source: "googleTasks",
+        });
+      });
+    }
+
+    await db.collection("users").doc(uid).set(
+      {
+        todos: allTasks,
+        connectedToTasks: true,
+      },
+      { merge: true }
+    );
+
+    const freshCredentials = oauth2Client.credentials || {};
+    const hasTokenUpdates =
+      Object.keys(freshCredentials).length > 0 &&
+      JSON.stringify(freshCredentials) !== JSON.stringify(tokens);
+
+    if (hasTokenUpdates) {
+      await db.collection("users").doc(uid).set(
+        { googleTokens: { ...tokens, ...freshCredentials } },
+        { merge: true }
+      );
+    }
+
+    res.json(allTasks);
+  } catch (err) {
+  console.error("TASKS ERROR FULL:", {
+    message: err?.message,
+    code: err?.code,
+    status: err?.response?.status,
+    data: err?.response?.data,
+  });
+
+  res.status(500).json({
+    error: "Failed to load Google Tasks",
+    details: err?.response?.data || err?.message,
+  });
+  }
+});
 export default router;

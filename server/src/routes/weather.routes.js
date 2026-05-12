@@ -2,7 +2,10 @@ import express from "express";
 
 const router = express.Router();
 
-const convertKelvinToCelcius = (Kelvin) => { return Math.round((Kelvin - 273.15) * 100) / 100 }
+const convertKelvinToCelcius = (temp) => {
+  return Math.round(temp);
+};
+
 const apiKey = process.env.OPEN_WEATHER_API;
 
 const NEWS_SOURCES = {
@@ -52,20 +55,73 @@ router.get("/weather", async (req, res) => {
     if (!apiKey) return res.status(500).json({ error: "Weather API key is not configured" });
     if (!lat || !long) return res.status(400).json({ error: "lat and long are required query params" });
 
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&appid=${apiKey}`
+    const currentResponse = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&appid=${apiKey}&units=metric`
     );
-    const result = await response.json();
-    if (!response.ok || result.cod !== 200) {
-      return res.status(Number(result.cod) || response.status || 400).json({ error: result.message || "Weather API error" });
+    const currentResult = await currentResponse.json();
+
+    if (!currentResponse.ok || currentResult.cod !== 200) {
+      return res.status(Number(currentResult.cod) || currentResponse.status || 400).json({ error: currentResult.message || "Weather API error" });
     }
 
+    const forecastResponse = await fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${long}&appid=${apiKey}&units=metric`
+    );
+    const forecastResult = await forecastResponse.json();
+
+    if (!forecastResponse.ok || forecastResult.cod !== "200") {
+      return res.status(Number(forecastResult.cod) || forecastResponse.status || 400).json({ error: forecastResult.message || "Forecast API error" });
+    }
+
+    const timezoneOffsetSeconds = forecastResult.city?.timezone || 0;
+
+    const targetForecasts = [
+      { hour: 8, display: "08:00" },
+      { hour: 14, display: "14:00" },
+      { hour: 20, display: "20:00" },
+    ];
+
+    const nowLocal = new Date(Date.now() + timezoneOffsetSeconds * 1000);
+
+    const forecast = targetForecasts
+      .map(({ hour, display }) => {
+        const targetLocal = new Date(nowLocal);
+        targetLocal.setHours(hour, 0, 0, 0);
+
+        if (targetLocal < nowLocal) {
+          targetLocal.setDate(targetLocal.getDate() + 1);
+        }
+
+        const match = forecastResult.list.find((item) => {
+          const itemLocal = new Date(item.dt * 1000 + timezoneOffsetSeconds * 1000);
+
+          return (
+            itemLocal.getUTCFullYear() === targetLocal.getUTCFullYear() &&
+            itemLocal.getUTCMonth() === targetLocal.getUTCMonth() &&
+            itemLocal.getUTCDate() === targetLocal.getUTCDate() &&
+            itemLocal.getUTCHours() === hour
+          );
+        });
+
+        if (!match) return null;
+
+        return {
+          time: display,
+          temp: convertKelvinToCelcius(match.main.temp),
+          description: match.weather?.[0]?.description || "",
+          icon: match.weather?.[0]?.icon || "",
+          openWeatherTime: match.dt_txt,
+        };
+      })
+      .filter(Boolean);
+
     res.json({
-      temp:        convertKelvinToCelcius(result.main.temp),
-      feels_like:  convertKelvinToCelcius(result.main.feels_like),
-      description: result.weather[0].description,
-      city:        result.name,
-      icon:        result.weather[0].icon,
+      temp:        convertKelvinToCelcius(currentResult.main.temp),
+      feels_like:  convertKelvinToCelcius(currentResult.main.feels_like),
+      description: currentResult.weather[0].description,
+      city:        currentResult.name,
+      icon:        currentResult.weather[0].icon,
+      forecast,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -77,7 +133,7 @@ router.get("/weather/:city", async (req, res) => {
         const { city } = req.params;
         if (!apiKey) return res.status(500).json({ error: "Weather API key is not configured" });
 
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}`);
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`);
         const result = await response.json();
 
         if (!response.ok || !result.main?.temp) {
