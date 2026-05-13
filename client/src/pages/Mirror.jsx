@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { auth, db } from "../firebase";
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 import WeatherWidget from "../components/Mirror/WeatherWidget";
@@ -10,6 +10,7 @@ import ClockWidget from "../components/Mirror/ClockWidget";
 import NewsWidget from "../components/Mirror/NewsWidget";
 import TodoWidget from "../components/Mirror/TodoWidget";
 import QuotesWidget from "../components/Mirror/QuotesWidget";
+import { NotificationProvider } from "../notifications/NotificationProvider";
 import { onAuthStateChanged } from "firebase/auth";
 
 //Radera när vi deploy.
@@ -65,35 +66,41 @@ export default function Mirror() {
 
   const { mirrorW, mirrorH, placed } = layout;
 
+  const expectedNotificationSources = placed
+    .map((p) => p.id)
+    .filter((id) => ["calendar", "weather", "news"].includes(id));
+
   return (
     <div style={styles.page}>
-      <div
-        ref={canvasRef}
-        style={{
-          ...styles.canvas,
-          aspectRatio: `${mirrorW} / ${mirrorH}`,
-        }}
-      >
-        {placed.map((p) => {
-          const scaleX = 100 / mirrorW;
-          const scaleY = 100 / mirrorH;
+      <NotificationProvider expectedSources={expectedNotificationSources} uid={uid}>
+        <div
+          ref={canvasRef}
+          style={{
+            ...styles.canvas,
+            aspectRatio: `${mirrorW} / ${mirrorH}`,
+          }}
+        >
+          {placed.map((p) => {
+            const scaleX = 100 / mirrorW;
+            const scaleY = 100 / mirrorH;
 
-          return (
-            <div
-              key={p.id}
-              style={{
-                ...styles.widget,
-                left: `${p.x * scaleX}%`,
-                top: `${p.y * scaleY}%`,
-                width: `${p.w * scaleX}%`,
-                height: `${p.h * scaleY}%`,
-              }}
-            >
-              <div style={styles.widgetInner}>{renderWidget(p.id, uid)}</div>
-            </div>
-          );
-        })}
-      </div>
+            return (
+              <div
+                key={p.id}
+                style={{
+                  ...styles.widget,
+                  left: `${p.x * scaleX}%`,
+                  top: `${p.y * scaleY}%`,
+                  width: `${p.w * scaleX}%`,
+                  height: `${p.h * scaleY}%`,
+                }}
+              >
+                <div style={styles.widgetInner}>{renderWidget(p.id, uid)}</div>
+              </div>
+            );
+          })}
+        </div>
+      </NotificationProvider>
     </div>
   );
 }

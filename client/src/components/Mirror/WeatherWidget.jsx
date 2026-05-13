@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { api } from "../../api/client.js";
+import { useNotifier } from "../../notifications/NotificationProvider";
 
 export default function WeatherWidget() {
     /*
@@ -11,12 +12,14 @@ export default function WeatherWidget() {
     const [weather, setWeather] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const notifier = useNotifier();
 
     useEffect(() => {
         const fetchWeather = async () => {
             if (!navigator.geolocation) {
                 setError("Location unable to fetch");
                 setLoading(false);
+                notifier?.reportApiStatus("weather", "error");
                 return;
             }
 
@@ -30,8 +33,11 @@ export default function WeatherWidget() {
                         });
 
                         setWeather(res.data);
+                        setError(null);
+                        notifier?.reportApiStatus("weather", "success");
                     } catch (error) {
                         setError(error);
+                        notifier?.reportApiStatus("weather", "error");
                     } finally {
                         setLoading(false);
                     }
@@ -39,6 +45,7 @@ export default function WeatherWidget() {
                 (error) => {
                     setError("Error: " + error.message);
                     setLoading(false);
+                    notifier?.reportApiStatus("weather", "error");
                 }
             );
         };
@@ -47,10 +54,10 @@ export default function WeatherWidget() {
 
         const interval = setInterval(() => {
             fetchWeather();
-        }, 15 * 60 * 1000); // every 15 minutes
+        }, 60 * 60 * 1000); // every hour
 
         return () => clearInterval(interval);
-    }, []);
+    }, [notifier]);
 
     if (loading) { return <div style={styles.center}><p style={styles.meta}>Loading weather...</p></div>}
     if (error) { return <div style={styles.center}><p style={styles.meta}>{String(error)}</p></div>}
