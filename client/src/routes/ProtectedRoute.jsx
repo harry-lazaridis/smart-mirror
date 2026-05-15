@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import Loader from "../components/common/Loader.jsx";
 
 export default function ProtectedRoute({ children }) {
   const [user, setUser] = useState(undefined);
@@ -16,7 +17,7 @@ export default function ProtectedRoute({ children }) {
   }, []);
 
   if (user === undefined) {
-    return <div>Loading...</div>;
+    return <Loader label="Loading..." compact />;
   }
 
   if (!user) {

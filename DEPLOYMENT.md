@@ -1,106 +1,96 @@
-# Deployment (Proxmox VM + Nginx Reverse Proxy)
+# Deployment (Firebase Hosting + Functions)
 
-## Security model
+This setup deploys:
+- Frontend (`client/dist`) to Firebase Hosting
+- Backend Express API to Firebase Functions via a Hosting rewrite for `/api/**`
 
-- Expose only `80` and `443` publicly.
-- Keep Node backend on `127.0.0.1:5000` (internal only).
-- Do not expose Vite dev server `5173` in production.
-- Terminate TLS in Nginx.
+## 1) Prerequisites
 
-## 1) Build frontend
+- Firebase project created
+- Billing enabled (required for many external outbound API calls from Functions)
+- Firebase CLI installed and logged in
+
+```bash
+npm install -g firebase-tools
+firebase login
+```
+
+## 2) Project config
+
+Update `.firebaserc`:
+
+```json
+{
+  "projects": {
+    "default": "YOUR_FIREBASE_PROJECT_ID"
+  }
+}
+```
+
+## 3) Install backend deps for Functions
 
 From repo root:
+
+```bash
+npm install --prefix server
+```
+
+## 4) Configure Functions environment
+
+Create `server/.env` with:
+
+```env
+CLIENT_URL=https://YOUR_PROJECT_ID.web.app
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=https://YOUR_PROJECT_ID.web.app/api/auth/google/callback
+OPEN_WEATHER_API=...
+```
+
+Optional for local/non-Firebase-admin initialization:
+
+```env
+FIREBASE_PROJECT_ID=...
+FIREBASE_CLIENT_EMAIL=...
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+```
+
+## 5) Build frontend
 
 ```bash
 npm run build --prefix client
 ```
 
-Deploy output:
-
-- Copy `client/dist` to `/var/www/smart-mirror/client/dist`
-
-## 2) Backend environment
-
-Create backend env file:
+## 6) Deploy both frontend + backend
 
 ```bash
-cp deploy/production.env.example /var/www/smart-mirror/server/.env
+firebase deploy --only hosting,functions
 ```
 
-Set real domain in `.env`:
+## 7) Configure Google OAuth redirect URI
 
-```env
-PORT=5000
-CLIENT_URL=https://YOUR_DOMAIN
-```
+In Google Cloud Console OAuth client settings, add:
 
-You can set multiple origins:
+- `https://YOUR_PROJECT_ID.web.app/api/auth/google/callback`
 
-```env
-CLIENT_URL=https://YOUR_DOMAIN,https://admin.YOUR_DOMAIN
-```
+If you also use the `firebaseapp.com` domain, add:
 
-## 3) Backend service (systemd)
+- `https://YOUR_PROJECT_ID.firebaseapp.com/api/auth/google/callback`
 
-Install unit:
+## 8) Verify
 
 ```bash
-sudo cp deploy/systemd/smart-mirror-backend.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now smart-mirror-backend
-sudo systemctl status smart-mirror-backend
+curl https://YOUR_PROJECT_ID.web.app/api/health
 ```
 
-## 4) Nginx reverse proxy
-
-Install config:
-
-```bash
-sudo cp deploy.nginx.smart-mirror.conf /etc/nginx/sites-available/smart-mirror
-sudo ln -s /etc/nginx/sites-available/smart-mirror /etc/nginx/sites-enabled/smart-mirror
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-Edit these values in config first:
-
-- `server_name`
-- `ssl_certificate`
-- `ssl_certificate_key`
-
-## 5) TLS certificate (Let's Encrypt)
-
-Example with certbot:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d YOUR_DOMAIN
-```
-
-## 6) Firewall / Proxmox network
-
-Open only:
-
-- `80/tcp`
-- `443/tcp`
-
-Close public access to:
-
-- `5000/tcp`
-- `5173/tcp`
-
-Backend still works because Nginx proxies to `127.0.0.1:5000` internally.
-
-## 7) Verify
-
-```bash
-curl -I https://YOUR_DOMAIN
-curl https://YOUR_DOMAIN/api/health
-```
-
-Expected health response:
+Expected:
 
 ```json
 {"status":"ok"}
 ```
+
+## Notes
+
+- API routes are available under `/api/*` and are rewritten to the `api` function.
+- File uploads in Functions use `/tmp` storage (ephemeral), which is compatible with Cloud Functions.
+- If you use a custom Hosting domain, set `CLIENT_URL` and `GOOGLE_REDIRECT_URI` to that domain.

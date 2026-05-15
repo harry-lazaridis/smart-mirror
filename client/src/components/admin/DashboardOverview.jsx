@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { db } from "../../firebase";
-import { doc, onSnapshot } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
 import { FiGrid, FiCalendar, FiMap, FiCheckSquare, FiMonitor, FiUser } from "react-icons/fi";
 
 export default function DashboardOverview({ user }) {
   const [userData, setUserData] = useState(null);
+  const [devices, setDevices] = useState([]);
+  const [removingDeviceId, setRemovingDeviceId] = useState(null);
   const greetingName = user?.displayName || user?.email?.split("@")[0] || "there";
 
   useEffect(() => {
@@ -16,6 +18,38 @@ export default function DashboardOverview({ user }) {
 
     return () => unsub();
   }, [user?.uid]);
+
+  useEffect(() => {
+    if (!user?.uid) return undefined;
+
+    const devicesQuery = query(collection(db, "devices"), where("uid", "==", user.uid));
+    const unsub = onSnapshot(devicesQuery, (snapshot) => {
+      setDevices(
+        snapshot.docs.map((item) => ({
+          id: item.id,
+          ...item.data(),
+        }))
+      );
+    });
+
+    return () => unsub();
+  }, [user?.uid]);
+
+  const removeDevice = async (deviceId) => {
+    if (!deviceId) return;
+    const confirmed = window.confirm("Remove this device? The mirror will return to sync mode.");
+    if (!confirmed) return;
+
+    setRemovingDeviceId(deviceId);
+    try {
+      await deleteDoc(doc(db, "devices", deviceId));
+    } catch (error) {
+      console.error("Failed to remove device:", error);
+      alert("Failed to remove device. Please try again.");
+    } finally {
+      setRemovingDeviceId(null);
+    }
+  };
 
   const summary = useMemo(() => {
     const layout = userData?.widgetLayout ?? {};
@@ -133,6 +167,48 @@ export default function DashboardOverview({ user }) {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="settings-card" style={{ marginTop: 24 }}>
+        <h2>Connected devices</h2>
+        <p className="stat-subtitle" style={{ marginTop: 0 }}>
+          Removing a device sends that mirror back to sync mode.
+        </p>
+
+        {devices.length === 0 ? (
+          <p className="stat-subtitle">No connected devices yet.</p>
+        ) : (
+          <div style={{ display: "grid", gap: 10 }}>
+            {devices.map((device) => (
+              <div
+                key={device.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  padding: "10px 12px",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 8,
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600 }}>{device.id}</div>
+                  <div className="stat-subtitle" style={{ marginTop: 2 }}>
+                    Linked by: {device.linkedBy || "Unknown"}
+                  </div>
+                </div>
+                <button
+                  className="btn-danger"
+                  disabled={removingDeviceId === device.id}
+                  onClick={() => removeDevice(device.id)}
+                >
+                  {removingDeviceId === device.id ? "Removing..." : "Remove"}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

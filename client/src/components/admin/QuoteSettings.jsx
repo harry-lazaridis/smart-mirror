@@ -62,7 +62,7 @@ export default function QuoteSettings(){
         <div>
              <div className="page-header">
             <h1>Quotes</h1>
-            <p>Choose the type of qoutes to show in the mirror quotes widget.</p>
+            <p>Choose the type of quotes to show in the mirror quotes widget.</p>
              </div>
 
              <div className="quotes-grid">

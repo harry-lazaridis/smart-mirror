@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { auth, db } from "../../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 import { FiMapPin } from "react-icons/fi";
 import { FaSubway, FaTram, FaBus, FaShip, FaTrain } from "react-icons/fa";
+import Loader from "../common/Loader.jsx";
 
 //How often we make a real API request to SL
 const REFRESH_INTERVAL = 60000;
@@ -91,7 +92,7 @@ const fetchDepartures = async (siteId, timewindow) => {
   return data.departures ?? [];
 };
 
-export default function SLWidget() {
+export default function SLWidget({ uid }) {
   const rootRef = useRef(null);
 
   //Stops chosen by the user in settings
@@ -135,36 +136,27 @@ export default function SLWidget() {
     return () => observer.disconnect();
   }, []);
 
-  //Loads the user's saved stops and SL settings from Firebase when the widget first mounts
+  //Loads and live-syncs the user's saved stops and SL settings from Firebase
   useEffect(() => {
-    const loadSavedStops = async () => {
-      const uid = auth.currentUser?.uid;
+    if (!uid) {
+      setLoading(false);
+      return undefined;
+    }
 
-      //If no user is logged in, stop loading and show the empty-state message
-      if (!uid) {
-        setLoading(false);
-        return;
-      }
-
-      const snap = await getDoc(doc(db, "users", uid));
+    const unsub = onSnapshot(doc(db, "users", uid), (snap) => {
       const data = snap.data() ?? {};
 
-      // Prefer the new chosen-stop setup, but old routes still work
       const savedStops = (data.slStops ?? data.slRoutes ?? [])
         .map(normaliseStop)
         .filter(Boolean);
 
       setStops(savedStops);
-
-      //Merge saved user settings with defaults
-      //Saved settings override default values
       setSettings({ ...DEFAULT_SETTINGS, ...(data.slSettings ?? {}) });
-
       setLoading(false);
-    };
+    });
 
-    loadSavedStops();
-  }, []);
+    return () => unsub();
+  }, [uid]);
 
   //Filters, formats, and sorts departures before displaying them
   const filteredAndSortedDepartures = useCallback(
@@ -209,7 +201,10 @@ export default function SLWidget() {
 
   //Fetches fresh departures for all selected stops
   const refresh = useCallback(async () => {
-    if (stops.length === 0) return;
+    if (stops.length === 0) {
+      setDeparturesByStop({});
+      return;
+    }
 
     setError(null);
 
@@ -233,15 +228,16 @@ export default function SLWidget() {
     }
   }, [settings.timewindow, stops]);
 
+  //Refresh immediately whenever stops/settings change
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
   //Starts the real SL API refresh interval
-  //Also runs one refresh immediately when stops are available
   useEffect(() => {
     if (stops.length === 0) return undefined;
 
-    refresh();
     refreshTimer.current = setInterval(refresh, REFRESH_INTERVAL);
-
-    //Clear the interval when the component unmounts or dependencies change
     return () => clearInterval(refreshTimer.current);
   }, [refresh, stops.length]);
 
@@ -267,7 +263,7 @@ export default function SLWidget() {
   );
 
   //Loading state shown while Firebase or SL data is being loaded
-  if (loading) return <div ref={rootRef} className={`sl-widget sl-widget--${layoutMode} dimmed`}>Loading SL departures...</div>;
+  if (loading) return <div ref={rootRef} className={`sl-widget sl-widget-- dimmed`}><Loader label="Loading SL departures..." dark compact /></div>;
 
   //Empty state shown when the user has not selected any stops
   if (stops.length === 0) {

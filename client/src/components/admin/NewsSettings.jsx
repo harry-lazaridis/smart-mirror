@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
 import { api } from "../../api/client";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import Loader from "../common/Loader.jsx";
 
 const DEFAULT_SETTINGS = {
   sources: ["svt", "sr_ekot"],
@@ -21,7 +22,7 @@ export default function NewsSettings() {
 
         const [userSnap, sourceRes] = await Promise.all([
           getDoc(doc(db, "users", uid)),
-          api.get("/api/util/news/sources"),
+          api.get("/util/news/sources"),
         ]);
 
         const saved = userSnap.data()?.newsSettings ?? {};
@@ -54,7 +55,7 @@ export default function NewsSettings() {
     await save({ ...settings, sources: nextSources });
   };
 
-  if (loading) return <div className="settings-card"><p>Loading...</p></div>;
+  if (loading) return <div className="settings-card"><Loader label="Loading settings..." compact /></div>;
 
   return (
     <div>

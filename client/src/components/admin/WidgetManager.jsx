@@ -10,7 +10,7 @@ const WIDGETS = [
   { id: "todo",     name: "Todo",          icon: FiCheckSquare, description: "Your to-do list on the mirror" },
   { id: "weather",  name: "Weather",       icon: FiCloud, description: "Current weather" },
   { id: "news",     name: "News",          icon: FiFileText, description: "Latest headlines" },
-  { id: "quotes",   name: "Qoutes",        icon: FiMessageSquare, description: "Daily Qoutes"},
+  { id: "quotes",   name: "Quotes",        icon: FiMessageSquare, description: "Daily Quotes"},
 ];
 
 const DEFAULT_POSITIONS = {

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { FiCheckCircle, FiCircle } from "react-icons/fi";
+import Loader from "../common/Loader.jsx";
 
 export default function TodoWidget() {
   const [todos, setTodos] = useState([]);
@@ -52,7 +53,7 @@ export default function TodoWidget() {
     return [...todos].sort((a, b) => Number(a.done) - Number(b.done));
   }, [todos]);
 
-  if (loading) return <div style={styles.wrapper}>Loading todos...</div>;
+  if (loading) return <div style={styles.wrapper}><Loader label="Loading todos..." dark compact /></div>;
 
   return (
     <div style={styles.wrapper}>

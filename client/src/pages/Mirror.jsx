@@ -11,6 +11,7 @@ import NewsWidget from "../components/Mirror/NewsWidget";
 import TodoWidget from "../components/Mirror/TodoWidget";
 import QuotesWidget from "../components/Mirror/QuotesWidget";
 import { onAuthStateChanged } from "firebase/auth";
+import Loader from "../components/common/Loader.jsx";
 
 //Radera när vi deploy.
 const isDevMode = () => localStorage.getItem("devMode") === "true";
@@ -60,7 +61,7 @@ export default function Mirror() {
   }, []);
 
   if (!layout) {
-    return <p style={{ color: "white", padding: 20 }}>Loading...</p>;
+    return <div style={{ color: "white", padding: 20 }}><Loader label="Loading mirror..." dark /></div>;
   }
 
   const { mirrorW, mirrorH, placed } = layout;
@@ -110,7 +111,7 @@ function renderWidget(id, uid) {
     case "calendar":
       return <CalendarWidget uid={uid} />;
     case "sl":
-      return <SLWidget />;
+      return <SLWidget uid={uid} />;
     case "todo":
       return <TodoWidget />;
     case "quotes":

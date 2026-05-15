@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { buildApiUrl } from "../../api/baseUrl";
+import Loader from "../common/Loader.jsx";
 
 const DEFAULT_LOOKAHEAD_DAYS = 3;
 const MAX_LOOKAHEAD_DAYS = 30;
 
 export default function CalendarSettings() {
-  const backendBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
   const [connected, setConnected] = useState(false);
   const [events, setEvents] = useState([]);
   const [uploadedEvents, setUploadedEvents] = useState([]);
@@ -38,7 +39,7 @@ export default function CalendarSettings() {
             : DEFAULT_LOOKAHEAD_DAYS
         );
 
-        const res = await fetch(`${backendBaseUrl}/api/auth/google/calendar`, {
+        const res = await fetch(buildApiUrl("/api/auth/google/calendar"), {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -57,7 +58,7 @@ export default function CalendarSettings() {
         }
         else setConnected(false);
         
-        const uploadRes = await fetch(`${backendBaseUrl}/api/calendar/events`, {
+        const uploadRes = await fetch(buildApiUrl("/api/calendar/events"), {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -84,7 +85,7 @@ export default function CalendarSettings() {
     if (!currentUser) return;
 
     const token = await currentUser.getIdToken();
-    window.location.href = `${backendBaseUrl}/api/auth/google?token=${encodeURIComponent(token)}`;
+    window.location.href = buildApiUrl(`/api/auth/google?token=${encodeURIComponent(token)}`);
   };
 
   const disconnectGoogle = async () => {
@@ -94,7 +95,7 @@ export default function CalendarSettings() {
       if (!currentUser) throw new Error("Not logged in");
       const token = await currentUser.getIdToken();
 
-      const res = await fetch(`${backendBaseUrl}/api/auth/google/disconnect`, {
+      const res = await fetch(buildApiUrl("/api/auth/google/disconnect"), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -201,7 +202,7 @@ export default function CalendarSettings() {
       formData.append("file", file);
 
       // Calling the backend
-      const res = await fetch(`${backendBaseUrl}/api/calendar/upload`, {
+      const res = await fetch(buildApiUrl("/api/calendar/upload"), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -233,7 +234,7 @@ export default function CalendarSettings() {
       const token = await currentUser.getIdToken();
 
       const res = await fetch(
-        `${backendBaseUrl}/api/calendar/events/${eventId}`,
+        buildApiUrl(`/api/calendar/events/${eventId}`),
         {
           method: "DELETE",
           headers: {
@@ -320,7 +321,7 @@ export default function CalendarSettings() {
     return new Date(0);
   }
 
-  if (loading) return <div className="settings-card"><p>Loading...</p></div>;
+  if (loading) return <div className="settings-card"><Loader label="Loading settings..." compact /></div>;
 
   const allEvents = [...events, ...uploadedEvents].sort(
     (a,b) => getEventDate(a) - getEventDate(b)

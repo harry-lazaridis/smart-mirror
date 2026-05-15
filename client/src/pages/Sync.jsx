@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import {QRCodeSVG} from 'qrcode.react';
 import { onSnapshot, serverTimestamp, doc, setDoc } from "firebase/firestore";
 import { FiCheckCircle } from "react-icons/fi";
+import Loader from "../components/common/Loader.jsx";
 
 const getOrCreateDeviceId = () => {
     let id = localStorage.getItem("deviceId");
@@ -16,7 +17,7 @@ const getOrCreateDeviceId = () => {
 
 export default function Sync() {
     const [deviceId, setDeviceId] = useState(null);
-    const [synced, setSynced] = useState(false);
+    const [status, setStatus] = useState("idle");
 
     const navigate = useNavigate();
 
@@ -31,7 +32,7 @@ export default function Sync() {
         const unsub = onSnapshot(deviceRef, (snap) => {
             const data = snap.data();
             if (data?.uid) {
-                setSynced(true);
+                setStatus("synced");
                 setTimeout(() => navigate("/mirror"), 2000);
             }
         });
@@ -39,32 +40,32 @@ export default function Sync() {
         return () => unsub();
     }, [])
 
-    const linkUrl = deviceId ? `${window.location.origin}/link?device=${deviceId}` : null;
+    const linkUrl = deviceId ? `${window.location.origin}/login?device=${deviceId}` : null;
 
   if (status === "synced") {
     return (
       <div style={styles.page}>
         <div style={styles.checkmark}><FiCheckCircle size={64} /></div>
-        <h2 style={styles.title}>Konto kopplat!</h2>
-        <p style={styles.subtitle}>Startar spegeln...</p>
+        <h2 style={styles.title}>Connected!</h2>
+        <p style={styles.subtitle}>Starting mirror...</p>
       </div>
     );
   }
 
   return (
     <div style={styles.page}>
-      <h1 style={styles.title}>Magic Mirror</h1>
+      <h1 style={styles.title}>Black Mirror</h1>
       <p style={styles.subtitle}>Scan to connect your mirror!</p>
 
       <div style={styles.qrWrapper}>
         {linkUrl
           ? <QRCodeSVG value={linkUrl} size={220} bgColor="#0f172a" fgColor="#f8fafc" />
-          : <p style={{ color: "#475569" }}>Genererar...</p>
+          : <Loader label="Generating QR..." dark compact />
         }
       </div>
 
       <p style={styles.hint}></p>
-      <p style={styles.deviceId}>Enhet: {deviceId?.slice(0, 8)}...</p>
+      <p style={styles.deviceId}>Device: {deviceId?.slice(0, 8)}...</p>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
   FiMonitor,
   FiSettings,
   FiLogOut,
+  FiCloud,
 } from "react-icons/fi";
 
 const NAV_ITEMS = [
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { id: "news", label: "News", icon: FiFileText },
   { id: "todo", label: "Todo", icon: FiCheckSquare },
   { id: "quotes", label: "Quotes", icon: FiMessageSquare },
+  { id: "weather", label: "Weather", icon: FiCloud },
   { id: "widgets", label: "Widgets", icon: FiGrid },
   { id: "layout", label: "Mirror Layout", icon: FiMonitor },
   { id: "user", label: "Account", icon: FiSettings },

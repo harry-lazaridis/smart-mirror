@@ -6,6 +6,18 @@ import { authMiddleware } from "../middleware/auth.js";
 
 const router = express.Router();
 
+const getRequestBaseUrl = (req) => {
+  const forwardedProto = req.headers["x-forwarded-proto"];
+  const proto = (Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto) || req.protocol || "https";
+  const host = req.get("host");
+  return `${proto}://${host}`;
+};
+
+const getRedirectUri = (req) =>
+  process.env.GOOGLE_REDIRECT_URI || `${getRequestBaseUrl(req)}/api/auth/google/callback`;
+
+const getClientUrl = (req) => process.env.CLIENT_URL || getRequestBaseUrl(req);
+
 const verifyToken = async (req) => {
   const authHeader = req.headers.authorization;
   const queryToken = req.query.token;
@@ -27,7 +39,7 @@ router.get("/google/test", authMiddleware, (req, res) => {
 router.get("/google", async (req, res) => {
   try {
     const decoded = await verifyToken(req);
-    const oauth2Client = createOAuth2Client();
+    const oauth2Client = createOAuth2Client(getRedirectUri(req));
     const url = oauth2Client.generateAuthUrl({
       access_type: "offline",
       prompt: "consent",
@@ -47,7 +59,7 @@ router.get("/google", async (req, res) => {
 router.get("/google/callback", async (req, res) => {
   const { code, state } = req.query;
   try {
-    const oauth2Client = createOAuth2Client();
+    const oauth2Client = createOAuth2Client(getRedirectUri(req));
     const { tokens } = await oauth2Client.getToken(code);
     const uid = state;
 
@@ -56,7 +68,7 @@ router.get("/google/callback", async (req, res) => {
       { merge: true }
     );
 
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const clientUrl = getClientUrl(req);
     res.redirect(`${clientUrl}/admin?calendar=connected`);
   } catch (err) {
     console.error("GOOGLE CALLBACK ERROR:", err?.message || err);
@@ -228,15 +240,44 @@ router.get("/google/tasks", async (req, res) => {
 
     res.json(allTasks);
   } catch (err) {
+    const errorData = err?.response?.data;
+    const isInvalidGrant =
+      err?.message === "invalid_grant" || errorData?.error === "invalid_grant";
+    const isInsufficientScope =
+      err?.code === 403 ||
+      errorData?.error?.status === "PERMISSION_DENIED" ||
+      errorData?.error?.message?.toLowerCase?.().includes("insufficient") ||
+      errorData?.error_description?.toLowerCase?.().includes("insufficient");
+
+    if (isInvalidGrant || isInsufficientScope) {
+      try {
+        const decoded = await verifyToken(req);
+        await db.collection("users").doc(decoded.uid).set(
+          {
+            connectedToTasks: false,
+            googleReconnectRequired: true,
+          },
+          { merge: true }
+        );
+      } catch (cleanupError) {
+        console.error("TASKS TOKEN CLEANUP ERROR:", cleanupError?.message || cleanupError);
+      }
+
+      return res.status(401).json({
+        error: "Google Tasks permission expired or missing. Please reconnect Google.",
+        code: "GOOGLE_RECONNECT_REQUIRED",
+      });
+    }
+
     console.error("TASKS ERROR FULL:", {
       message: err?.message,
       code: err?.code,
       status: err?.response?.status,
-      data: err?.response?.data,
+      data: errorData,
     });
     res.status(500).json({
       error: "Failed to load Google Tasks",
-      details: err?.response?.data || err?.message,
+      details: errorData || err?.message,
     });
   }
 });

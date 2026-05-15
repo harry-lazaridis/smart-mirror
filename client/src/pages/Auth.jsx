@@ -6,17 +6,35 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth, provider } from "../firebase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { db } from "../firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const deviceId = searchParams.get("device");
 
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const linkDeviceIfPresent = async (user) => {
+    if (!deviceId) return;
+    const deviceRef = doc(db, "devices", deviceId);
+    const deviceSnap = await getDoc(deviceRef);
+    if (!deviceSnap.exists()) return;
+    await setDoc(
+      deviceRef,
+      {
+        uid: user.uid,
+        linkedAt: serverTimestamp(),
+        linkedBy: user.email || null,
+      },
+      { merge: true }
+    );
+  };
 
   const handleEmailAuth = async () => {
     try {
@@ -33,7 +51,9 @@ export default function Auth() {
       }
 
       await createUserSnap(userCredential.user);
-      navigate("/admin");
+      await linkDeviceIfPresent(userCredential.user);
+      if (deviceId) navigate(`/link?device=${encodeURIComponent(deviceId)}&status=success`);
+      else navigate("/admin");
     } catch (err) {
       console.error(err);
       alert(err.message);
@@ -45,8 +65,9 @@ export default function Auth() {
       const result = await signInWithPopup(auth, provider);
 
       await createUserSnap(result.user);
-
-      navigate("/admin");
+      await linkDeviceIfPresent(result.user);
+      if (deviceId) navigate(`/link?device=${encodeURIComponent(deviceId)}&status=success`);
+      else navigate("/admin");
     } catch (err) {
       console.error(err);
       alert(err.message);

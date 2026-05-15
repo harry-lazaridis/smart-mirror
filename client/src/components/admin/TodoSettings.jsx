@@ -67,7 +67,7 @@ export default function TodoSettings() {
     await saveTodos(next);
   };
 
-  if (loading) return <div className="settings-card"><p>Loading...</p></div>;
+  if (loading) return <div className="settings-card"><Loader label="Loading settings..." compact /></div>;
 
   return (
     <div>
@@ -139,6 +139,8 @@ export default function TodoSettings() {
 import { useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { buildApiUrl } from "../../api/baseUrl";
+import Loader from "../common/Loader.jsx";
 
 const createTodo = (text) => ({
   id: crypto.randomUUID(),
@@ -149,9 +151,6 @@ const createTodo = (text) => ({
 });
 
 export default function TodoSettings() {
-  const backendBaseUrl =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
   const [loading, setLoading] = useState(true);
@@ -206,7 +205,7 @@ export default function TodoSettings() {
 
       const token = await currentUser.getIdToken();
 
-      const res = await fetch(`${backendBaseUrl}/api/auth/google/tasks`, {
+      const res = await fetch(buildApiUrl("/api/auth/google/tasks"), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -215,6 +214,15 @@ export default function TodoSettings() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (res.status === 401 && data?.code === "GOOGLE_RECONNECT_REQUIRED") {
+          const shouldReconnect = window.confirm(
+            "Google Tasks permissions need to be refreshed. Reconnect Google now?"
+          );
+          if (shouldReconnect) {
+            window.location.href = buildApiUrl(`/api/auth/google?token=${encodeURIComponent(token)}`);
+            return;
+          }
+        }
         throw new Error(data?.error || "Failed to sync Google Tasks");
       }
 

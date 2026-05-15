@@ -12,11 +12,14 @@ const envOrigins = (process.env.CLIENT_URL || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 const allowedOrigins = envOrigins.length > 0 ? envOrigins : defaultOrigins;
+const hasConfiguredOrigins = envOrigins.length > 0;
 
 app.use(cors({
   origin(origin, callback) {
     // Allow non-browser clients (curl, health checks) with no Origin header
     if (!origin) return callback(null, true);
+    // If no CLIENT_URL is configured, allow all origins (useful for first deploy).
+    if (!hasConfiguredOrigins) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
     return callback(new Error("Not allowed by CORS"));
   },

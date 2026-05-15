@@ -1,22 +1,35 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { FiCheckCircle } from "react-icons/fi";
+import Loader from "../components/common/Loader.jsx";
 
 export default function Link() {
   const [searchParams]      = useSearchParams();
+  const navigate = useNavigate();
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
   const deviceId             = searchParams.get("device");
+  const successFromAuth = searchParams.get("status") === "success";
 
   useEffect(() => {
+    if (!deviceId) return;
+    if (successFromAuth) {
+      setStatus("success");
+      return;
+    }
+
     const unsub = onAuthStateChanged(auth, (user) => {
-      if (user && status === "idle") linkDevice(user);
+      if (!user) {
+        navigate(`/login?device=${encodeURIComponent(deviceId)}`, { replace: true });
+        return;
+      }
+      if (status === "idle") linkDevice(user);
     });
     return () => unsub();
-  }, []);
+  }, [deviceId, successFromAuth]);
 
   const linkDevice = async (user) => {
     setStatus("loading");
@@ -44,17 +57,6 @@ export default function Link() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      await linkDevice(result.user);
-    } catch (err) {
-      setStatus("error");
-      setMessage("Login failed.");
-    }
-  };
-
   if (!deviceId) return (
     <div style={styles.page}><p style={styles.error}>Invalid link.</p></div>
   );
@@ -63,16 +65,9 @@ export default function Link() {
     <div style={styles.page}>
       <h1 style={styles.title}>BlackMirror</h1>
 
-      {status === "idle" && (
-        <>
-          <p style={styles.subtitle}>Connect mirror to your account</p>
-          <button onClick={handleGoogleLogin} style={styles.googleBtn}>
-            Sign in with Google
-          </button>
-        </>
-      )}
+      {status === "idle" && <p style={styles.subtitle}>Preparing login...</p>}
 
-      {status === "loading" && <p style={styles.subtitle}>Connecting...</p>}
+      {status === "loading" && <Loader label="Connecting..." dark compact />}
 
       {status === "success" && (
         <>
@@ -103,11 +98,6 @@ const styles = {
   },
   title: { fontSize: 32, fontWeight: 700, margin: 0, letterSpacing: 2 },
   subtitle: { fontSize: 15, color: "#94a3b8", margin: 0, textAlign: "center" },
-  googleBtn: {
-    padding: "12px 24px", background: "white", color: "#1e293b",
-    border: "none", borderRadius: 8, fontSize: 15,
-    cursor: "pointer", fontWeight: 600,
-  },
   error: { color: "#f87171", textAlign: "center", margin: 0 },
   retryBtn: {
     padding: "10px 20px", background: "transparent", color: "#94a3b8",

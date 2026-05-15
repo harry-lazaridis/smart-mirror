@@ -9,7 +9,7 @@ import { authMiddleware } from "../middleware/auth.js";
 import { db } from "../config/firebase.js"
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/"})
+const upload = multer({ dest: "/tmp/uploads/" });
 
 function getEventDate(event) {
     const start = event?.start;

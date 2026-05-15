@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
 import { api } from "../../api/client";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import Loader from "../common/Loader.jsx";
 
 export default function NewsWidget() {
   const [items, setItems] = useState([]);
@@ -17,7 +18,7 @@ export default function NewsWidget() {
           const sources = Array.isArray(newsSettings.sources) ? newsSettings.sources : ["svt", "sr_ekot"];
           const limit = Number(newsSettings.limit) || 8;
 
-          const res = await api.get("/api/util/news", {
+          const res = await api.get("/util/news", {
             params: {
               sources: sources.join(","),
               limit,
@@ -66,7 +67,7 @@ export default function NewsWidget() {
   return (
     <div style={styles.wrap}>
       <h3 style={styles.title}>News</h3>
-      {loading && <p style={styles.text}>Loading headlines...</p>}
+      {loading && <Loader label="Loading headlines..." dark compact />}
       {!loading && items.length === 0 && <p style={styles.text}>No headlines available.</p>}
       {!loading && items.length > 0 && (
         <div style={styles.list}>

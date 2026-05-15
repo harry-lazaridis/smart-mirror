@@ -3,6 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { api } from "../../api/client";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { buildApiUrl } from "../../api/baseUrl";
+import Loader from "../common/Loader.jsx";
 
 const DEFAULT_LOOKAHEAD_DAYS = 3;
 const MAX_LOOKAHEAD_DAYS = 30;
@@ -44,10 +46,10 @@ export default function CalendarWidget({ uid }) {
 
         const token = await currentUser.getIdToken();
         const [googleRes, uploadedRes] = await Promise.allSettled([
-          api.get("/api/auth/google/calendar", {
+          api.get("/auth/google/calendar", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          api.get("/api/calendar/events", {
+          api.get("/calendar/events", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -121,11 +123,10 @@ export default function CalendarWidget({ uid }) {
     if (!currentUser) return;
 
     const token = await currentUser.getIdToken();
-    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-    window.location.href = `${baseURL}/api/auth/google?token=${encodeURIComponent(token)}`;
+    window.location.href = buildApiUrl(`/api/auth/google?token=${encodeURIComponent(token)}`);
   };
 
-  if (loading) return <div style={styles.card}>Loading...</div>;
+  if (loading) return <div style={styles.card}><Loader label="Loading calendar..." dark compact /></div>;
   if (needsReconnect) {
     return (
       <div style={styles.card}>

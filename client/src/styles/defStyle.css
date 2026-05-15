@@ -196,6 +196,35 @@ button {
   color: #64748b;
 }
 
+.loader-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #334155;
+}
+
+.loader-wrap--dark {
+  color: #cbd5e1;
+}
+
+.loader-wrap--compact {
+  gap: 8px;
+}
+
+.loader-icon {
+  animation: loader-spin 1s linear infinite;
+}
+
+.loader-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@keyframes loader-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* KEEP THESE SIMPLE FOR NOW */
 .stats-grid {
   display: grid;

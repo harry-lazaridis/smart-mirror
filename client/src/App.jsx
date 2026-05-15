@@ -23,19 +23,12 @@ function App() {
       <Routes>
 
         <Route path="/sync" element={<Sync />} />
-        <Route path="/sync" element={<Link />} />
+        <Route path="/link" element={<Link />} />
 
         {/** Public access */}
         <Route path="/login" element={<Auth />} /> 
 
-        <Route 
-          path="/mirror" 
-          element={
-            <ProtectedRoute>
-              <Mirror />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/mirror" element={<Mirror />} />
 
         <Route
           path="/admin"
