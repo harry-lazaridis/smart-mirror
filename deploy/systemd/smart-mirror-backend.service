@@ -1,0 +1,25 @@
+[Unit]
+Description=Smart Mirror Backend
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/smart-mirror/server
+Environment=NODE_ENV=production
+Environment=PORT=5000
+EnvironmentFile=/var/www/smart-mirror/server/.env
+ExecStart=/usr/bin/node /var/www/smart-mirror/server/src/server.js
+Restart=always
+RestartSec=5
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/www/smart-mirror/server
+
+[Install]
+WantedBy=multi-user.target

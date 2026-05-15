@@ -6,10 +6,20 @@ import weatherRoutes from "./routes/weather.routes.js"
 import fileRoutes from "./routes/file.routes.js"
 
 const app = express();
-const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+const defaultOrigins = ["http://localhost:5173"];
+const envOrigins = (process.env.CLIENT_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = envOrigins.length > 0 ? envOrigins : defaultOrigins;
 
 app.use(cors({
-  origin: clientUrl,
+  origin(origin, callback) {
+    // Allow non-browser clients (curl, health checks) with no Origin header
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true
 }));
 app.use(express.json());
